@@ -2,14 +2,14 @@
 
 **Course:** IBE160 Programming with AI  
 **Student:** Matthew Ryan Gjendem | **Group:** G19  
-**Date:** 13 September 2026 | **Status:** Draft for discussion  
+**Date:** 13 September 2026 | **Updated:** 14 September 2026 | **Status:** Final product brief  
 **Working name:** Smart To-Do
 
 ## Executive Summary
 
 Smart To-Do is a personal task-management application for people balancing responsibilities across work, family and studies. Its main purpose is to provide one overview of unfinished tasks and approaching deadlines. A calendar is the main view, bringing these responsibilities together while categories help users distinguish between them.
 
-The idea comes from the project owner's experience as a parent, employee and student. Work tasks are recorded in notes, private commitments in a mobile calendar, and some tasks are kept in memory. The main difficulty is maintaining an overview. IBE160 provides an opportunity to build and test a solution using project proposal 6, To-Do List with Smart Labels, and the BMAD method. Development starts with reliable task management and a calendar, followed by AI label suggestions once the foundation works.
+The idea comes from the project owner's experience balancing family, work and studies, with tasks spread across notes, a mobile calendar and memory. Using project proposal 6, To-Do List with Smart Labels, and the BMAD method in IBE160, development starts with reliable task management and a calendar, followed by AI label suggestions.
 
 ## The Problem
 
@@ -33,7 +33,7 @@ Existing calendars and task planners are valid alternatives. This project makes 
 
 ## Who This Serves
 
-The primary audience is people who manage their own tasks across several responsibilities, including work, family and education. The app is not limited to students. The project owner is the first user and can test it against everyday needs. Success means seeing outstanding tasks and approaching deadlines together. Workplace use initially means organising an individual's tasks, rather than assigning work within a team.
+The primary audience is people managing their own tasks across work, family and education. The project owner is the first user and will test the app against everyday needs. Workplace use means organising personal tasks rather than assigning work within a team.
 
 ## Success Criteria
 
@@ -42,7 +42,7 @@ These are proposed targets to verify during development, not completed results:
 - A test set of ten tasks across Work, Family and Studies appears correctly on deadline dates or in the undated list. Editing, completion and saved data remain correct after reopening the app.
 - The project owner can identify upcoming deadlines across all categories, find overdue and undated tasks, and filter by category without consulting separate task notes for the same test tasks.
 - Two additional users can each add a dated task, find it in the calendar and mark it complete without step-by-step assistance. Difficulties are recorded and addressed.
-- After AI labels are added, at least 16 of 20 predefined, unambiguous tasks receive a suitable suggestion against written criteria. Suggestions can be corrected, and simulated AI failure does not prevent normal task management.
+- After AI labels are added, at least 16 of 20 predefined, unambiguous tasks receive a label suggestion that meets written criteria. Suggestions can be corrected, and simulated AI failure does not prevent normal task management.
 - The project owner can demonstrate the app and explain its core behaviour. GitHub documentation records setup, tests, AI assistance and known limitations.
 
 ## Scope
