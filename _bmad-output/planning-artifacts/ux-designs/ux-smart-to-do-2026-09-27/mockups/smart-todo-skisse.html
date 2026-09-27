@@ -1,0 +1,103 @@
+<div id="smart-todo-sketch">
+<style>
+#smart-todo-sketch{color-scheme:light dark;--paper:light-dark(#ffffff,#202326);--canvas:light-dark(#f5f6f8,#171a1d);--ink:light-dark(#25313d,#eef1f5);--muted:light-dark(#5c6875,#b7c0cb);--line:light-dark(#dce1e6,#424951);--blue:light-dark(#e0edff,#203954);--yellow:light-dark(#fff1b3,#51471c);--green:light-dark(#dcefdc,#24432d);--brown:light-dark(#ead8c4,#49392c);--danger:light-dark(#ac1825,#ff939c);font:14px/1.45 system-ui,sans-serif;color:var(--ink);background:var(--canvas);border-radius:14px;overflow:hidden}
+#smart-todo-sketch *{box-sizing:border-box}
+#smart-todo-sketch button,#smart-todo-sketch input,#smart-todo-sketch select,#smart-todo-sketch textarea{font:inherit;color:inherit}
+#smart-todo-sketch button{cursor:pointer;background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:6px 10px}
+#smart-todo-sketch button:focus-visible,#smart-todo-sketch input:focus-visible{outline:3px solid light-dark(#386db1,#83b5fa);outline-offset:2px}
+#smart-todo-sketch header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px;background:var(--paper);border-bottom:1px solid var(--line);flex-wrap:wrap}
+#smart-todo-sketch h2,#smart-todo-sketch h3,#smart-todo-sketch p{margin:0}
+#smart-todo-sketch h2{font-size:20px;font-weight:600} #smart-todo-sketch h3{font-size:15px;font-weight:600}
+#smart-todo-sketch .subtitle{color:var(--muted);font-size:12px;margin-top:3px}
+#smart-todo-sketch .shell{display:grid;grid-template-columns:220px minmax(0,1fr)}
+#smart-todo-sketch .side{padding:20px 14px;background:var(--paper);border-right:1px solid var(--line)}
+#smart-todo-sketch .period{margin-bottom:26px} #smart-todo-sketch .period h3{margin-bottom:10px}
+#smart-todo-sketch .task{background:var(--tone);border-left:3px solid var(--stripe);border-radius:5px;display:flex;align-items:flex-start;gap:5px;padding:7px;margin:5px 0;min-width:0}
+#smart-todo-sketch .task input{margin:4px 0 0;flex-shrink:0;accent-color:light-dark(#334f6f,#a6c9f2)}
+#smart-todo-sketch .task button{background:transparent;border:0;padding:0;text-align:left;min-width:0;flex:1;overflow-wrap:anywhere}
+#smart-todo-sketch .task small{display:block;color:var(--muted);font-size:11px}
+#smart-todo-sketch .task.conflict .name{color:var(--danger)} #smart-todo-sketch .task.done .name{text-decoration:line-through}
+#smart-todo-sketch .conflict-label{color:var(--danger);font-size:11px}
+#smart-todo-sketch .empty{color:var(--muted);font-size:12px;padding:8px 0}
+#smart-todo-sketch .more{border:0;background:transparent;text-decoration:underline;padding-left:0}
+#smart-todo-sketch main{padding:20px;min-width:0}
+#smart-todo-sketch .toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+#smart-todo-sketch .legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;font-size:12px}
+#smart-todo-sketch .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--stripe)}
+#smart-todo-sketch .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+#smart-todo-sketch .weekday{background:var(--canvas);padding:8px 2px;text-align:center;color:var(--muted);font-size:12px}
+#smart-todo-sketch .day{background:var(--paper);min-height:98px;padding:5px;min-width:0}
+#smart-todo-sketch .day.blank{background:var(--canvas)}
+#smart-todo-sketch .day.today{box-shadow:inset 0 0 0 2px light-dark(#386db1,#83b5fa)}
+#smart-todo-sketch .dayhead{display:flex;align-items:center;justify-content:space-between;gap:2px}
+#smart-todo-sketch .datebtn{border:0;padding:3px 5px;font-weight:600}
+#smart-todo-sketch .plus{border:0;padding:2px 6px;color:var(--muted)}
+#smart-todo-sketch .day .task{font-size:11px;padding:4px;gap:3px} #smart-todo-sketch .day .task small{display:none}
+#smart-todo-sketch .day .task input{width:12px;height:12px;margin-top:2px}
+#smart-todo-sketch .expanded{grid-column:1/-1;background:var(--paper);padding:18px;border-top:2px solid light-dark(#386db1,#83b5fa)}
+#smart-todo-sketch .expanded-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px}
+#smart-todo-sketch .daylayout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:20px}
+#smart-todo-sketch .hour{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;border-top:1px solid var(--line);min-height:44px;padding:4px 0}
+#smart-todo-sketch .hour>button{align-self:start;border:0;color:var(--muted);padding:4px;font-size:12px}
+#smart-todo-sketch .untimed{border-left:1px solid var(--line);padding-left:14px}
+#smart-todo-sketch form{padding:16px;background:var(--canvas);border-radius:8px;margin-bottom:16px}
+#smart-todo-sketch .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#smart-todo-sketch label{display:block;font-size:12px} #smart-todo-sketch label.wide{grid-column:1/-1}
+#smart-todo-sketch input:not([type=checkbox]),#smart-todo-sketch select,#smart-todo-sketch textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:6px;padding:7px;margin-top:4px}
+#smart-todo-sketch .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap} #smart-todo-sketch .primary{background:light-dark(#2d4f74,#a6c9f2);color:light-dark(#fff,#142333);border-color:transparent}
+#smart-todo-sketch .error{color:var(--danger);margin-top:8px} #smart-todo-sketch .status{padding:8px 24px;color:var(--muted);font-size:12px;min-height:33px}
+@media(max-width:750px){#smart-todo-sketch .shell{grid-template-columns:175px minmax(0,1fr)}#smart-todo-sketch main{padding:10px}#smart-todo-sketch .daylayout{grid-template-columns:1fr}#smart-todo-sketch .untimed{border-left:0;padding-left:0}#smart-todo-sketch .day{min-height:78px}#smart-todo-sketch .day .task{display:none}}
+@media(max-width:520px){#smart-todo-sketch .shell{display:block}#smart-todo-sketch .side{border-right:0;border-bottom:1px solid var(--line)}#smart-todo-sketch .period{margin-bottom:16px}#smart-todo-sketch .fields{grid-template-columns:1fr}#smart-todo-sketch .expanded{padding:10px}}
+</style>
+<header><div><h2>Smart To-Do</h2><p class="subtitle">Kalender og oppgaver</p></div><span class="subtitle">Klikkbar skisse · eksempeloppgaver · lagres ikke</span></header>
+<div class="shell"><aside class="side" aria-label="Oppgaveoversikt"></aside><main><div class="toolbar"><h3 class="monthtitle"></h3><div><button data-action="prev" aria-label="Forrige måned">‹</button> <button data-action="today">I dag</button> <button data-action="next" aria-label="Neste måned">›</button></div></div><div class="legend"></div><div class="grid" aria-label="Kalender"></div></main></div>
+<div class="status" role="status" aria-live="polite"></div>
+<script>
+(()=>{
+const root=document.getElementById('smart-todo-sketch');
+const today='2026-09-27'; let month=8,year=2026,selected=null,editor=null;
+const expanded={};
+const cats={Jobb:['var(--blue)','light-dark(#4a7fc5,#79aef0)'],Skole:['var(--yellow)','light-dark(#b99a26,#d4b649)'],Familie:['var(--green)','light-dark(#538759,#88b890)'],Ellers:['var(--brown)','light-dark(#a27c55,#bd9670)']};
+let tasks=[
+{id:1,title:'Skrive rapport',date:today,start:'09:00',end:'10:30',cat:'Jobb',done:false,notes:''},
+{id:2,title:'Lese kapittel 3',date:today,start:'10:00',end:'11:00',cat:'Skole',done:false,notes:''},
+{id:3,title:'Planlegge middag',date:today,start:'16:00',end:'16:30',cat:'Familie',done:true,notes:''},
+{id:4,title:'Bestille service',date:today,start:'',end:'',cat:'Ellers',done:false,notes:''},
+{id:5,title:'Sende prosjektforslag',date:'2026-09-29',start:'12:00',end:'13:00',cat:'Skole',done:false,notes:''},
+{id:6,title:'Foreldremøte',date:'2026-09-30',start:'18:00',end:'19:00',cat:'Familie',done:false,notes:''},
+{id:7,title:'Oppdatere budsjett',date:'2026-10-02',start:'09:00',end:'10:00',cat:'Jobb',done:false,notes:''}];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const key=(y,m,d)=>`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+const pretty=d=>new Date(d+'T12:00:00').toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'});
+const style=c=>`--tone:${cats[c][0]};--stripe:${cats[c][1]}`;
+const conflict=t=>!t.done&&t.start&&tasks.some(o=>o.id!==t.id&&!o.done&&o.date===t.date&&o.start&&t.start<o.end&&o.start<t.end);
+const sorted=ts=>ts.slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.start||'99').localeCompare(b.start||'99'));
+function task(t){const c=conflict(t);return `<div class="task ${t.done?'done':''} ${c?'conflict':''}" style="${style(t.cat)}"><input type="checkbox" data-check="${t.id}" aria-label="Fullfør ${esc(t.title)}" ${t.done?'checked':''}><button data-edit="${t.id}"><span class="name">${esc(t.title)}</span><small>${t.start?t.start+'–'+t.end:'Uten klokkeslett'} · ${t.cat}</small>${c?'<span class="conflict-label">Overlapper</span>':''}</button></div>`;}
+function form(){if(!editor)return '';return `<form><h3>${editor.id?'Endre oppgave':'Ny oppgave'}</h3><div class="fields"><label class="wide">Tittel<input name="title" required value="${esc(editor.title||'')}"></label><label class="wide">Beskrivelse<textarea name="notes" rows="2">${esc(editor.notes||'')}</textarea></label><label>Dato<input name="date" type="date" value="${editor.date}"></label><label>Kategori<select name="cat">${Object.keys(cats).map(c=>`<option ${c===(editor.cat||'Ellers')?'selected':''}>${c}</option>`).join('')}</select></label><label>Start (valgfritt)<input name="start" type="time" value="${editor.start||''}"></label><label>Slutt (valgfritt)<input name="end" type="time" value="${editor.end||''}"></label></div><p class="error" role="alert"></p><div class="actions"><button type="submit" class="primary">Lagre oppgave</button><button type="button" data-action="cancel">Avbryt</button></div></form>`;}
+function detail(){const ts=sorted(tasks.filter(t=>t.date===selected));const timed=ts.filter(t=>t.start);let hours=[8,9,10,11,12,13,14,15,16,17,18,19];timed.forEach(t=>{const h=Number(t.start.slice(0,2));if(!hours.includes(h))hours.push(h)});hours.sort((a,b)=>a-b);return `<section class="expanded"><div class="expanded-head"><h3>${pretty(selected)}</h3><button data-action="close">Lukk dagen</button></div>${form()}<div class="daylayout"><div aria-label="Timeplan">${hours.map(h=>`<div class="hour"><button data-time="${String(h).padStart(2,'0')}:00" aria-label="Ny oppgave klokken ${h}">${String(h).padStart(2,'0')}.00 +</button><div>${timed.filter(t=>Number(t.start.slice(0,2))===h).map(task).join('')}</div></div>`).join('')}</div><aside class="untimed"><h3>Uten klokkeslett</h3>${ts.filter(t=>!t.start).map(task).join('')||'<p class="empty">Ingen oppgaver uten klokkeslett.</p>'}</aside></div></section>`;}
+function render(){
+root.querySelector('.monthtitle').textContent=new Date(year,month,1).toLocaleDateString('nb-NO',{month:'long',year:'numeric'});
+root.querySelector('.legend').innerHTML=Object.keys(cats).map(c=>`<span style="${style(c)}"><span class="dot"></span>${c}</span>`).join('');
+const now=new Date(today+'T12:00:00'),end=new Date(now);end.setDate(now.getDate()+(7-now.getDay())%7);const weekEnd=key(end.getFullYear(),end.getMonth(),end.getDate());
+root.querySelector('.side').innerHTML=[['I dag',t=>t.date===today],['Denne uken',t=>t.date>today&&t.date<=weekEnd],['Kommende',t=>t.date>weekEnd]].map(([label,filter])=>{const list=sorted(tasks.filter(filter));return `<section class="period"><h3>${label}</h3>${(expanded[label]?list:list.slice(0,2)).map(task).join('')||'<p class="empty">Ingen oppgaver.</p>'}${list.length>2?`<button class="more" data-more="${label}">${expanded[label]?'Vis mindre':'Vis mer'}</button>`:''}</section>`}).join('');
+const offset=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate();let html=['Man','Tir','Ons','Tor','Fre','Lør','Søn'].map(d=>`<div class="weekday">${d}</div>`).join('');
+for(let i=0;i<Math.ceil((offset+days)/7)*7;i++){const d=i-offset+1;if(d<1||d>days)html+='<div class="day blank"></div>';else{const date=key(year,month,d),ts=sorted(tasks.filter(t=>t.date===date));html+=`<div class="day ${date===today?'today':''}"><div class="dayhead"><button class="datebtn" data-day="${date}" aria-label="Åpne ${pretty(date)}${date===today?', i dag':''}">${d}${date===today?' •':''}</button><button class="plus" data-plus="${date}" aria-label="Ny oppgave ${pretty(date)}">+</button></div>${ts.slice(0,2).map(task).join('')}${ts.length>2?`<button class="more" data-day="${date}">+${ts.length-2} til</button>`:''}</div>`;}if(i%7===6&&selected){const sd=Number(selected.slice(8));if(selected.startsWith(key(year,month,1).slice(0,7))&&sd+offset-1>=i-6&&sd+offset-1<=i)html+=detail();}}
+root.querySelector('.grid').innerHTML=html;
+}
+root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||(b.type==='submit'&&b.closest('form')))return;
+if(b.dataset.more){expanded[b.dataset.more]=!expanded[b.dataset.more];render();return;}
+if(b.dataset.day){selected=selected===b.dataset.day?null:b.dataset.day;editor=null;}
+if(b.dataset.plus){selected=b.dataset.plus;editor={date:selected,cat:'Ellers'};}
+if(b.dataset.time){editor={date:selected,start:b.dataset.time,cat:'Ellers'};}
+if(b.dataset.edit){const t=tasks.find(t=>t.id===Number(b.dataset.edit));selected=t.date;year=Number(t.date.slice(0,4));month=Number(t.date.slice(5,7))-1;editor={...t};}
+const a=b.dataset.action;if(a==='prev'||a==='next'){const date=new Date(year,month+(a==='prev'?-1:1),1);year=date.getFullYear();month=date.getMonth();selected=null;editor=null;}
+if(a==='today'){year=2026;month=8;selected=today;editor=null;}
+if(a==='close'){selected=null;editor=null;}if(a==='cancel')editor=null;
+render();});
+root.addEventListener('change',e=>{if(e.target.dataset.check){const t=tasks.find(t=>t.id===Number(e.target.dataset.check));t.done=e.target.checked;render();root.querySelector('.status').textContent=t.done?'Oppgaven er fullført og blir stående.':'Oppgaven er åpnet igjen.';}});
+root.addEventListener('submit',e=>{e.preventDefault();const f=e.target,v=Object.fromEntries(new FormData(f));if(!v.title.trim()){f.querySelector('.error').textContent='Skriv en tittel.';return;}if(!v.date){f.querySelector('.error').textContent='Velg en dato i denne skissen.';return;}if(Boolean(v.start)!==Boolean(v.end)||(v.start&&v.end<=v.start)){f.querySelector('.error').textContent='Velg både start og slutt, med slutt etter start, eller la begge være tomme.';return;}const t={...v,title:v.title.trim(),id:editor.id||Date.now(),done:editor.done||false};if(editor.id)tasks=tasks.map(o=>o.id===t.id?t:o);else tasks.push(t);selected=null;editor=null;render();root.querySelector('.status').textContent='Oppgaven er lagt inn i skissen. Eksempeldata lagres ikke permanent.';});
+render();
+})();
+</script>
+</div>
+
