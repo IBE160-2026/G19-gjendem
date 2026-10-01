@@ -43,6 +43,7 @@ export function validateTask(task) {
   return typeof task.id === 'string' && task.id.length > 0 &&
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
     validDate(task.date) && categories.includes(task.category) &&
+    (task.description === undefined || typeof task.description === 'string') &&
     (task.completed === undefined || typeof task.completed === 'boolean') && validTimes(task.start, task.end);
 }
 export function readTasks(storage) {

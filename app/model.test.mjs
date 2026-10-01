@@ -95,3 +95,13 @@ test('upcoming uses dates then time with untimed last across DST week', () => {
   assert.deepEqual(groups.week.map(t=>t.id),['early','late','untimed']);
   assert.deepEqual(groups.upcoming.map(t=>t.id),['next']);
 });
+test('descriptions preserve multiline text, survive completion and can be cleared', () => {
+  const storage = memory(); addTask(storage, task);
+  const description='Ta med notater\n<script>not executable</script>\nÆØÅ';
+  changeTask(storage,task.id,{description});
+  changeTask(storage,task.id,{completed:true});
+  assert.equal(readTasks(storage)[0].description,description);
+  changeTask(storage,task.id,{description:''});
+  assert.equal(readTasks(storage)[0].description,'');
+  assert.throws(()=>changeTask(storage,task.id,{description:42}));
+});

@@ -34,7 +34,7 @@ function canLeave() {
 async function persist(operation) {
   if (saving) return false;
   saving = true;
-  const controls = [...document.querySelectorAll('button, input, select')].map(node => [node, node.disabled]);
+  const controls = [...document.querySelectorAll('button, input, select, textarea')].map(node => [node, node.disabled]);
   controls.forEach(([node]) => { node.disabled = true; });
   try {
     const write = () => { tasks = operation(); };
@@ -278,6 +278,10 @@ function openEditor(date, row = null, existing = null, startPrefill = '') {
   const title = element('input'); title.name = 'title'; title.required = true; title.maxLength = 200;
   title.placeholder = 'For eksempel: Levere rapport'; titleLabel.append(title);
   title.value = existing?.title ?? '';
+  const descriptionLabel = element('label', 'Beskrivelse (valgfritt)', 'description-field');
+  const description = element('textarea'); description.name = 'description'; description.rows = 3;
+  description.placeholder = 'Detaljer, huskeliste eller hva oppgaven gjelder';
+  description.value = existing?.description ?? ''; descriptionLabel.append(description);
   const fields = element('div', undefined, 'fields');
   const dateLabel = element('label', 'Dato');
   const dateInput = element('input'); dateInput.type = 'date'; dateInput.name = 'date'; dateInput.required = true;
@@ -299,7 +303,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '') {
   const save = element('button', 'Lagre oppgave', 'primary'); save.type = 'submit';
   const cancel = element('button', 'Avbryt'); cancel.type = 'button';
   cancel.addEventListener('click', () => { if (canLeave()) { dirty = false; expandedDate = null; load(); render(); calendar.querySelector(`[data-date="${date}"] .add`)?.focus(); } });
-  actions.append(save, cancel); form.append(titleLabel, fields, times, timeHelp, error, actions); panel.append(form);
+  actions.append(save, cancel); form.append(titleLabel, descriptionLabel, fields, times, timeHelp, error, actions); panel.append(form);
   if (existing) {
     const remove = element('button', 'Slett oppgave', 'danger'); remove.type = 'button';
     remove.addEventListener('click', async () => {
@@ -329,7 +333,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '') {
       (!start.value ? start : end).focus(); return;
     }
     try {
-      const task = {id: original?.id ?? crypto.randomUUID(), title: name, date: dateInput.value, category: category.value, start: start.value, end: end.value};
+      const task = {id: original?.id ?? crypto.randomUUID(), title: name, description: description.value, date: dateInput.value, category: category.value, start: start.value, end: end.value};
       if (!await persist(() => original
         ? changeTask(localStorage, task.id, task, original)
         : addTask(localStorage, task))) return;
