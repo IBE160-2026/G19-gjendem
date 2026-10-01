@@ -67,7 +67,7 @@ try {
   await page.locator('.untimed').getByRole('button',{name:'Rediger Forelesning',exact:true}).click();
   await page.getByLabel('Start (valgfritt)',{exact:true}).fill('12:30');
   await page.getByLabel('Slutt (valgfritt)',{exact:true}).fill('13:45');
-  await other.getByRole('button',{name:'Rediger Forelesning',exact:true}).click();
+  await other.locator('.week').getByRole('button',{name:'Rediger Forelesning',exact:true}).click();
   await other.getByLabel('Start (valgfritt)',{exact:true}).fill('14:00');
   await other.getByLabel('Slutt (valgfritt)',{exact:true}).fill('15:00');
   await other.getByRole('button',{name:'Lagre oppgave'}).click();

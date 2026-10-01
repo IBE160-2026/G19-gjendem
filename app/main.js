@@ -1,4 +1,4 @@
-import {categories, dateKey, validDate, validTimes, conflictingIds, byTime, readTasks, addTask, changeTask, monthDays, storageKey} from './model.js';
+import {categories, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, monthDays, storageKey} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
@@ -10,6 +10,8 @@ let saving = false;
 let editorSnapshot = null;
 let expandedDate = null;
 let conflicts = new Set();
+const expandedPeriods = new Set();
+let sidebarDate = '';
 const fullDate = value => new Intl.DateTimeFormat('nb-NO', {day: 'numeric', month: 'long', year: 'numeric'}).format(new Date(`${value}T12:00:00`));
 const element = (tag, text, className) => {
   const node = document.createElement(tag);
@@ -90,6 +92,51 @@ function render() {
     calendar.append(row);
   }
   if (expandedDate) drawDay();
+  drawUpcoming();
+}
+function drawUpcoming() {
+  const sidebar = document.querySelector('#upcoming');
+  const active = sidebar.contains(document.activeElement) ? document.activeElement : null;
+  const focusTask = active?.closest('[data-task-id]')?.dataset.taskId;
+  const focusPeriod = active?.closest('.period')?.id;
+  const focusCheckbox = active?.matches('input[type="checkbox"]');
+  const focusToggle = active?.classList.contains('period-toggle');
+  sidebarDate = dateKey(new Date());
+  sidebar.replaceChildren(element('h2', 'Min oversikt'));
+  if (blocked) { sidebar.append(element('p', 'Oppgavene kunne ikke leses. Se meldingen ved kalenderen.', 'error')); return; }
+  const groups = upcomingGroups(tasks);
+  for (const [key, label, description] of [
+    ['today', 'I dag', 'Det du har på planen i dag'],
+    ['week', 'Denne uken', 'Resten av uken etter i dag'],
+    ['upcoming', 'Kommende', 'Fra neste uke og videre']
+  ]) {
+    const section = element('section', undefined, 'period'); section.id = `period-${key}`;
+    section.setAttribute('aria-labelledby', `period-heading-${key}`);
+    const heading = element('h3', label); heading.id = `period-heading-${key}`; heading.tabIndex = -1;
+    section.append(heading, element('p', description, 'period-description'));
+    const list = element('div'); list.id = `period-list-${key}`;
+    const items = groups[key], expanded = expandedPeriods.has(key);
+    if (!items.length) list.append(element('p', 'Ingen oppgaver.', 'period-empty'));
+    for (const task of expanded ? items : items.slice(0,2)) list.append(taskCard(task, `sidebar-${key}`));
+    section.append(list);
+    if (items.length > 2) {
+      const toggle = element('button', expanded ? 'Vis mindre' : `Vis mer (${items.length - 2})`, 'period-toggle');
+      toggle.setAttribute('aria-expanded', String(expanded)); toggle.setAttribute('aria-controls', list.id);
+      toggle.addEventListener('click', () => {
+        if (saving) return;
+        if (expanded) expandedPeriods.delete(key); else expandedPeriods.add(key);
+        drawUpcoming();
+      });
+      section.append(toggle);
+    }
+    sidebar.append(section);
+  }
+  if (active) {
+    const card = [...sidebar.querySelectorAll('[data-task-id]')].find(node => node.dataset.taskId === focusTask);
+    const period = focusPeriod ? document.getElementById(focusPeriod) : null;
+    const target = focusTask ? card?.querySelector(focusCheckbox ? 'input' : '.task-edit') : focusToggle ? period?.querySelector('.period-toggle') : null;
+    (target ?? period?.querySelector('h3'))?.focus();
+  }
 }
 function taskCard(task, surface) {
   const card = element('div', undefined, `task ${task.category.toLowerCase()}`);
@@ -99,6 +146,10 @@ function taskCard(task, surface) {
   const edit = element('button', undefined, 'task-edit'); edit.type = 'button'; edit.disabled = blocked;
   edit.setAttribute('aria-label', `Rediger ${task.title}`);
   edit.append(element('span', task.title, 'task-title'), element('small', `${task.start ? `${task.start}–${task.end} · ` : ''}${task.category}`));
+  if (surface.startsWith('sidebar-')) {
+    edit.title = task.title;
+    if (surface !== 'sidebar-today') edit.append(element('small', fullDate(task.date), 'task-date'));
+  }
   card.classList.toggle('completed', Boolean(task.completed));
   if (conflicts.has(task.id)) { card.classList.add('conflict'); edit.append(element('small', 'Overlapper', 'conflict-label')); }
   edit.addEventListener('click', () => openEditor(task.date, null, task));
@@ -115,7 +166,7 @@ function taskCard(task, surface) {
       if (editor) { document.querySelector('#day-editor').append(editor); editorSnapshot = snapshot; }
       if (scrollTop !== undefined && document.querySelector('.timeline')) document.querySelector('.timeline').scrollTop = scrollTop;
       announce(completed ? `«${task.title}» er fullført.` : `«${task.title}» er åpnet igjen.`);
-      [...calendar.querySelectorAll('[data-task-id]')].find(node => node.dataset.taskId === task.id && node.dataset.surface === surface)?.querySelector('input').focus();
+      [...document.querySelectorAll('[data-task-id]')].find(node => node.dataset.taskId === task.id && node.dataset.surface === surface)?.querySelector('input').focus();
     } catch (error) { announce(writeError(error), true); check.focus(); }
   });
   card.append(check, edit); return card;
@@ -165,6 +216,9 @@ function drawDay() {
 }
 function openEditor(date, row = null, existing = null, startPrefill = '') {
   if (!canLeave()) return;
+  if (date.slice(0,7) !== dateKey(shown).slice(0,7)) {
+    shown = new Date(`${date}T12:00:00`); expandedDate = null; render();
+  }
   expandedDate = date; drawDay();
   dirty = false;
   const panel = element('section', undefined, 'editor'); panel.id = 'editor';
@@ -258,6 +312,7 @@ function refreshToday() {
     cell.querySelector('.today-label')?.remove();
     if (current) cell.querySelector('.day-number').after(element('span', 'I dag', 'today-label'));
   }
+  if (!saving && sidebarDate !== today) drawUpcoming();
 }
 setInterval(refreshToday, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshToday(); });

@@ -10,6 +10,8 @@
 <body>
   <main class="shell">
     <header class="app-header"><div><p class="eyebrow">LITT MER OVERSIKT I HVERDAGEN</p><h1>Smart To-Do<span class="logo-dot"></span></h1><p>Jobb, skole, familie og alt imellom.</p></div><span class="local-badge">Lagres på denne enheten</span></header>
+    <div class="workspace">
+    <aside id="upcoming" aria-label="Kommende oppgaver"></aside>
     <section class="calendar-card" aria-label="Oppgavekalender">
       <div class="toolbar"><div><p class="eyebrow">MIN KALENDER</p><h2 id="month" aria-live="polite"></h2></div><nav aria-label="Velg måned"><button id="previous" aria-label="Forrige måned">←</button><button id="today">I dag</button><button id="next" aria-label="Neste måned">→</button></nav></div>
       <div class="legend" aria-label="Kategorier"><span class="jobb">Jobb</span><span class="skole">Skole</span><span class="familie">Familie</span><span class="ellers">Ellers</span></div>
@@ -17,7 +19,8 @@
       <div class="calendar-scroll"><div id="calendar"></div></div>
       <p class="hint">Trykk på datoen for timeplan, + for ny oppgave, eller på en oppgave for å redigere.</p>
     </section>
-    <footer><strong>Under utvikling</strong> · Kalender og timeplan. Oversikten over kommende oppgaver kommer senere.<br>Oppgavene lagres i denne nettleseren. Sletting av nettleserdata fjerner dem. De synkroniseres ikke med GitHub eller andre enheter.</footer>
+    </div>
+    <footer><strong>Under utvikling</strong> · Kalender, timeplan og oversikt over kommende oppgaver.<br>Oppgavene lagres i denne nettleseren. Sletting av nettleserdata fjerner dem. De synkroniseres ikke med GitHub eller andre enheter.</footer>
   </main>
 </body>
 </html>

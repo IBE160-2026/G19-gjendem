@@ -17,6 +17,19 @@ export function conflictingIds(tasks) {
 export function byTime(a, b) {
   return (a.start || '99:99').localeCompare(b.start || '99:99') || a.title.localeCompare(b.title, 'nb');
 }
+export function upcomingGroups(tasks, now = new Date()) {
+  const today = dateKey(now);
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7 - (now.getDay() + 6) % 7);
+  const nextWeek = dateKey(monday);
+  const result = {today: [], week: [], upcoming: []};
+  for (const task of tasks) {
+    if (task.date === today) result.today.push(task);
+    else if (task.date > today && task.date < nextWeek) result.week.push(task);
+    else if (task.date >= nextWeek) result.upcoming.push(task);
+  }
+  for (const list of Object.values(result)) list.sort((a,b) => a.date.localeCompare(b.date) || byTime(a,b));
+  return result;
+}
 export function dateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

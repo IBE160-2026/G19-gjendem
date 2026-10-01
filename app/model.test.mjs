@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate, validTimes, conflictingIds, byTime, monthDays, readTasks, addTask, changeTask, storageKey} from './model.js';
+import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, addTask, changeTask, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
 test('calendar dates reject impossible dates and support leap years', () => {
@@ -74,4 +74,24 @@ test('conflicts mark both unfinished tasks, exclude touching edges and other day
   assert.equal(conflictingIds([a,{...b,date:'2026-09-28'}]).size, 0);
   assert.equal(conflictingIds([a,{...task,id:'untimed'}]).size, 0);
   assert.deepEqual([{...task,id:'untimed'},b,a].sort(byTime).map(t=>t.id), ['one','two','untimed']);
+});
+test('upcoming periods exclude past dates, separate Sunday from Monday and retain completion', () => {
+  const records = ['2026-12-26','2026-12-27','2026-12-28','2027-01-01'].map((date,i)=>({...task,id:String(i),date,completed:true}));
+  const sunday = upcomingGroups(records,new Date(2026,11,27,12));
+  assert.deepEqual(sunday.today.map(t=>t.id),['1']); assert.equal(sunday.week.length,0);
+  assert.deepEqual(sunday.upcoming.map(t=>t.id),['2','3']);
+  const monday = upcomingGroups(records,new Date(2026,11,28,12));
+  assert.deepEqual(monday.today.map(t=>t.id),['2']); assert.deepEqual(monday.week.map(t=>t.id),['3']);
+  assert.equal(monday.upcoming.length,0);
+});
+test('upcoming uses dates then time with untimed last across DST week', () => {
+  const records = [
+    {...task,id:'untimed',date:'2026-10-25'},
+    {...task,id:'late',date:'2026-10-25',start:'15:00',end:'16:00'},
+    {...task,id:'early',date:'2026-10-25',start:'09:00',end:'10:00'},
+    {...task,id:'next',date:'2026-10-26'}
+  ];
+  const groups = upcomingGroups(records,new Date(2026,9,24,12));
+  assert.deepEqual(groups.week.map(t=>t.id),['early','late','untimed']);
+  assert.deepEqual(groups.upcoming.map(t=>t.id),['next']);
 });
