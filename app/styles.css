@@ -12,3 +12,5 @@
 .time-picker-toggle{font-size:12px;padding:6px 10px;margin-top:6px;color:#245790}.time-chooser{margin-top:8px;padding:12px;background:#f0f4f8;border:1px solid #aab7c4;border-radius:7px}.time-chooser .fields{margin:0;gap:10px}.time-chooser .actions{margin-top:10px;gap:6px}.time-chooser button{font-size:12px;padding:8px}.time-field{min-width:0}
 
 .description-field{margin-top:14px}.editor textarea{font:inherit;line-height:1.5;border:1px solid #aab7c4;border-radius:7px;padding:10px;background:white;color:#25313d;width:100%;resize:vertical;min-height:90px}
+
+.tidy-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 26px 16px}.tidy-toolbar p{font-size:12px;color:#5c6875;line-height:1.5;flex-basis:100%;margin:0}.completed-panel{margin:0 26px 22px;padding:18px;background:#f7f9fc;border:1px solid #dce1e6;border-radius:9px}.completed-panel .task{max-width:680px}.completed-panel[hidden]{display:none}

@@ -23,6 +23,7 @@ export function upcomingGroups(tasks, now = new Date()) {
   const nextWeek = dateKey(monday);
   const result = {today: [], week: [], upcoming: []};
   for (const task of tasks) {
+    if (task.archived) continue;
     if (task.date === today) result.today.push(task);
     else if (task.date > today && task.date < nextWeek) result.week.push(task);
     else if (task.date >= nextWeek) result.upcoming.push(task);
@@ -44,6 +45,7 @@ export function validateTask(task) {
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
     validDate(task.date) && categories.includes(task.category) &&
     (task.description === undefined || typeof task.description === 'string') &&
+    (task.archived === undefined || typeof task.archived === 'boolean') && (!task.archived || task.completed === true) &&
     (task.completed === undefined || typeof task.completed === 'boolean') && validTimes(task.start, task.end);
 }
 export function readTasks(storage) {
@@ -81,9 +83,17 @@ export function changeTask(storage, id, change, expected) {
   if (change === null) next.splice(index, 1);
   else {
     const updated = {...tasks[index], ...change, id};
+    if (change.completed === false && updated.archived) updated.archived = false;
     if (!validateTask(updated)) throw new Error('Invalid task');
     next[index] = updated;
   }
   storage.setItem(storageKey, JSON.stringify({version: 1, tasks: next}));
+  return next;
+}
+
+export function archiveCompleted(storage) {
+  const tasks = readTasks(storage);
+  const next = tasks.map(task => task.completed && !task.archived ? {...task, archived:true} : task);
+  storage.setItem(storageKey, JSON.stringify({version:1,tasks:next}));
   return next;
 }

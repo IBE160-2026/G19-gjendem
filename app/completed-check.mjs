@@ -1,0 +1,84 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,channel:'msedge'});
+try {
+  const context=await browser.newContext({viewport:{width:1500,height:1100}});
+  const page=await context.newPage();
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://localhost:5173');
+  await page.evaluate(()=>{
+    const date=document.querySelector('[aria-current="date"]').dataset.date;
+    localStorage.setItem('smart-todo.v1',JSON.stringify({version:1,tasks:[
+      {id:'active',title:'Aktiv',date,category:'Jobb'},
+      {id:'done',title:'Ferdig i dag',date,category:'Familie',completed:true,description:'Behold alle detaljene',start:'12:00',end:'13:00'},
+      {id:'past',title:'Ferdig i fjor',date:'2025-01-10',category:'Skole',completed:true}
+    ]}));
+  });
+  await page.reload();
+  await page.getByRole('button',{name:/^Fullført/}).click();
+  assert.equal(await page.locator('#completed-panel .task').count(),2);
+  assert.equal(await page.locator('.week .task').count(),2);
+  await page.evaluate(()=>{window.realWrite=Storage.prototype.setItem;Storage.prototype.setItem=()=>{throw new Error('quota');};});
+  await page.getByRole('button',{name:'Rydd side',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#message').textContent.includes('ikke lagret'));
+  assert.equal(await page.locator('.week .task').count(),2);
+  await page.evaluate(()=>{Storage.prototype.setItem=window.realWrite;});
+  await page.getByRole('button',{name:'Rydd side',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.week .task').length===1);
+  assert.equal(await page.locator('#upcoming [data-task-id="done"]').count(),0);
+  assert.equal(await page.locator('#completed-panel .task').count(),2);
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('smart-todo.v1')).tasks.length),3);
+  await page.reload();await page.getByRole('button',{name:/^Fullført/}).click();
+  assert.equal(await page.locator('#completed-panel .task').count(),2);
+  await page.locator('#completed-panel').getByRole('button',{name:'Rediger Ferdig i dag',exact:true}).click();
+  assert.equal(await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).inputValue(),'Behold alle detaljene');
+  assert.equal(await page.getByLabel('Start (valgfritt)',{exact:true}).inputValue(),'12:00');
+  await page.getByRole('button',{name:'Avbryt',exact:true}).click();
+  await page.getByRole('button',{name:/^Fullført/}).click();
+  await page.locator('#completed-panel').getByRole('checkbox',{name:'Ferdig: Ferdig i dag',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('#completed-panel .task').length===1);
+  assert.equal(await page.locator('.week [data-task-id="done"] input').isChecked(),false);
+  await page.locator('.week').getByRole('checkbox',{name:'Ferdig: Ferdig i dag',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.week [data-task-id="done"] input').checked);
+  assert.equal(await page.locator('.week [data-task-id="done"]').count(),1);
+  await page.locator('.week').getByRole('button',{name:'Rediger Ferdig i dag',exact:true}).click();
+  await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).fill('Et utkast under rydding');
+  await page.getByRole('button',{name:'Rydd side',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.week [data-task-id="done"]'));
+  assert.equal(await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).inputValue(),'Et utkast under rydding');
+  await page.getByRole('button',{name:'Lagre oppgave',exact:true}).click();
+  await page.waitForSelector('#editor',{state:'detached'});
+  assert.equal(await page.locator('.week [data-task-id="done"]').count(),0);
+  if (await page.locator('#completed-panel').isHidden()) await page.getByRole('button',{name:/^Fullført/}).click();
+  assert.equal(await page.locator('#completed-panel .task').count(),2);
+  await page.screenshot({path:'app/test-results/completed.png',fullPage:true});
+  await page.locator('#completed-panel').getByRole('button',{name:'Rediger Ferdig i fjor',exact:true}).click();
+  await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).fill('Gjenåpnet med utkast');
+  await page.getByRole('button',{name:/^Fullført/}).click();
+  await page.locator('#completed-panel').getByRole('checkbox',{name:'Ferdig: Ferdig i fjor',exact:true}).click();
+  await page.waitForFunction(()=>{const box=document.querySelector('.week [data-task-id="past"] input');return box && !box.checked;});
+  assert.equal(await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).inputValue(),'Gjenåpnet med utkast');
+  await page.getByRole('button',{name:'Lagre oppgave',exact:true}).click();
+  await page.waitForSelector('#editor',{state:'detached'});
+  assert.match(await page.locator('#month').innerText(),/2025/);
+  assert.equal(await page.locator('.week [data-task-id="past"]').count(),1);
+  await page.getByRole('button',{name:'I dag',exact:true}).click();
+  await page.locator('.week').getByRole('checkbox',{name:'Ferdig: Aktiv',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('.week [data-task-id="active"] input').checked);
+  await page.locator('.week').getByRole('button',{name:'Rediger Aktiv',exact:true}).click();
+  await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).fill('Mitt lokale utkast');
+  const other=await page.context().newPage();await other.goto('http://localhost:5173');
+  await other.locator('.week').getByRole('button',{name:'Rediger Aktiv',exact:true}).click();
+  await other.getByLabel('Beskrivelse (valgfritt)',{exact:true}).fill('Endret i annen fane');
+  await other.getByRole('button',{name:'Lagre oppgave',exact:true}).click();
+  await other.waitForSelector('#editor',{state:'detached'});
+  await page.getByRole('button',{name:'Rydd side',exact:true}).click();
+  await page.waitForFunction(()=>!document.querySelector('.week [data-task-id="active"]'));
+  await page.getByRole('button',{name:'Lagre oppgave',exact:true}).click();
+  await page.getByRole('alert').filter({hasText:'annen fane'}).waitFor();
+  assert.equal(await page.getByLabel('Beskrivelse (valgfritt)',{exact:true}).inputValue(),'Mitt lokale utkast');
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('smart-todo.v1')).tasks.find(t=>t.id==='active').description),'Endret i annen fane');
+  assert.deepEqual(errors,[]);
+  console.log('Completed checks passed: all dates, cleanup without deletion, write failure, reload, description/time retention, reopen, explicit cleanup only, draft preservation.');
+} finally {await browser.close();}

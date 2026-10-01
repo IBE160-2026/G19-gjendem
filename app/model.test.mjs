@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, addTask, changeTask, storageKey} from './model.js';
+import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
 test('calendar dates reject impossible dates and support leap years', () => {
@@ -104,4 +104,19 @@ test('descriptions preserve multiline text, survive completion and can be cleare
   changeTask(storage,task.id,{description:''});
   assert.equal(readTasks(storage)[0].description,'');
   assert.throws(()=>changeTask(storage,task.id,{description:42}));
+});
+test('cleanup retains full records, hides completed tasks from upcoming and reopening restores', () => {
+  const storage=memory();addTask(storage,task);
+  const done={...task,id:'done',completed:true,description:'Keep me',start:'12:00',end:'13:00'};
+  addTask(storage,done);
+  const result=archiveCompleted(storage);
+  assert.equal(result.length,2);assert.deepEqual(result[1],{...done,archived:true});
+  assert.deepEqual(upcomingGroups(result,new Date(2026,8,27)).today.map(t=>t.id),['one']);
+  assert.deepEqual(archiveCompleted(storage),result);
+  changeTask(storage,'done',{completed:false});
+  assert.deepEqual(readTasks(storage)[1],{...done,completed:false,archived:false});
+  const before=storage.getItem(storageKey);
+  assert.throws(()=>archiveCompleted({getItem:storage.getItem,setItem(){throw new Error('quota');}}),/quota/);
+  assert.equal(storage.getItem(storageKey),before);
+  assert.throws(()=>changeTask(storage,'one',{archived:true}));
 });

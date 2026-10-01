@@ -1,4 +1,4 @@
-import {categories, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, monthDays, storageKey} from './model.js';
+import {categories, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
@@ -12,6 +12,7 @@ let expandedDate = null;
 let conflicts = new Set();
 const expandedPeriods = new Set();
 let sidebarDate = '';
+let completedOpen = false;
 const fullDate = value => new Intl.DateTimeFormat('nb-NO', {day: 'numeric', month: 'long', year: 'numeric'}).format(new Date(`${value}T12:00:00`));
 const element = (tag, text, className) => {
   const node = document.createElement(tag);
@@ -86,13 +87,37 @@ function render() {
       plus.disabled = blocked;
       plus.addEventListener('click', () => openEditor(date, row));
       heading.append(plus); cell.append(heading);
-      for (const task of tasks.filter(t => t.date === date).sort(byTime)) cell.append(taskCard(task, 'month'));
+      for (const task of tasks.filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
       row.append(cell);
     }
     calendar.append(row);
   }
   if (expandedDate) drawDay();
   drawUpcoming();
+  drawCompleted();
+}
+function drawCompleted() {
+  const panel = document.querySelector('#completed-panel');
+  panel.hidden = !completedOpen;
+  const items = tasks.filter(t => t.completed).sort((a,b) => b.date.localeCompare(a.date) || byTime(a,b));
+  const toggle = document.querySelector('#completed-toggle');
+  toggle.textContent = `Fullført (${items.length})`; toggle.setAttribute('aria-expanded', String(completedOpen));
+  document.querySelector('#tidy').disabled = blocked || !tasks.some(t => t.completed && !t.archived);
+  panel.replaceChildren();
+  if (!completedOpen) return;
+  const heading = element('h3','Fullførte oppgaver'); heading.id = 'completed-heading'; heading.tabIndex = -1;
+  panel.append(heading,element('p','Her er alle fullførte oppgaver. Fjern avkryssingen for å legge en oppgave tilbake i kalenderen.','day-help'));
+  if (blocked) {panel.append(element('p','Kunne ikke lese oppgavene. Ingen data er endret.','error'));return;}
+  if (!items.length) panel.append(element('p','Ingen fullførte oppgaver ennå.','day-help'));
+  for (const task of items) panel.append(taskCard(task,'completed-list'));
+}
+function redrawPreservingEditor() {
+  const editor = document.querySelector('#editor'), snapshot = editorSnapshot;
+  const scrollTop = document.querySelector('.timeline')?.scrollTop;
+  if (editor) editor.remove();
+  render();
+  if (editor) { document.querySelector('#day-editor').append(editor); editorSnapshot = snapshot; }
+  if (scrollTop !== undefined && document.querySelector('.timeline')) document.querySelector('.timeline').scrollTop = scrollTop;
 }
 function drawUpcoming() {
   const sidebar = document.querySelector('#upcoming');
@@ -150,23 +175,23 @@ function taskCard(task, surface) {
     edit.title = task.title;
     if (surface !== 'sidebar-today') edit.append(element('small', fullDate(task.date), 'task-date'));
   }
+  if (surface === 'completed-list') edit.append(element('small',fullDate(task.date)),element('small',task.archived ? 'Ryddet bort fra kalenderen' : 'Vises fortsatt i kalenderen'));
   card.classList.toggle('completed', Boolean(task.completed));
   if (conflicts.has(task.id)) { card.classList.add('conflict'); edit.append(element('small', 'Overlapper', 'conflict-label')); }
-  edit.addEventListener('click', () => openEditor(task.date, null, task));
+  edit.addEventListener('click', () => openEditor(task.date, null, task, '', surface === 'completed-list'));
   check.addEventListener('change', async () => {
     const completed = check.checked; check.checked = Boolean(task.completed);
     try {
       if (!await persist(() => changeTask(localStorage, task.id, {completed}))) return;
-      if (editorSnapshot?.id === task.id) editorSnapshot.completed = completed;
+      if (editorSnapshot?.id === task.id) {
+        editorSnapshot.completed = completed;
+        if (!completed && editorSnapshot.archived) editorSnapshot.archived = false;
+      }
       // Rebuild every task view while keeping an unsaved editor and its comparison snapshot intact.
-      const editor = document.querySelector('#editor'); const snapshot = editorSnapshot;
-      const scrollTop = document.querySelector('.timeline')?.scrollTop;
-      if (editor) editor.remove();
-      render();
-      if (editor) { document.querySelector('#day-editor').append(editor); editorSnapshot = snapshot; }
-      if (scrollTop !== undefined && document.querySelector('.timeline')) document.querySelector('.timeline').scrollTop = scrollTop;
+      redrawPreservingEditor();
       announce(completed ? `«${task.title}» er fullført.` : `«${task.title}» er åpnet igjen.`);
-      [...document.querySelectorAll('[data-task-id]')].find(node => node.dataset.taskId === task.id && node.dataset.surface === surface)?.querySelector('input').focus();
+      const target = [...document.querySelectorAll('[data-task-id]')].find(node => node.dataset.taskId === task.id && node.dataset.surface === surface)?.querySelector('input');
+      (target ?? document.querySelector('#completed-heading') ?? document.querySelector('#completed-toggle')).focus();
     } catch (error) { announce(writeError(error), true); check.focus(); }
   });
   card.append(check, edit); return card;
@@ -191,7 +216,7 @@ function drawDay() {
   const timetable = element('section'); timetable.append(element('h4', 'Timeplan'));
   timetable.append(element('p', 'Trykk på et klokkeslett for å legge til. Du velger sluttiden selv.', 'day-help'));
   const timeline = element('div', undefined, 'timeline'); timeline.tabIndex = 0; timeline.setAttribute('aria-label', 'Timeplan for hele dagen');
-  const dated = tasks.filter(t => t.date === expandedDate).sort(byTime);
+  const dated = tasks.filter(t => t.date === expandedDate && !t.archived).sort(byTime);
   for (let hour = 0; hour < 24; hour++) {
     const time = `${String(hour).padStart(2, '0')}:00`;
     const slot = element('div', undefined, 'time-slot'); slot.dataset.hour = String(hour);
@@ -261,8 +286,9 @@ function timeField(caption, name, initial) {
   toggle.addEventListener('click',open);
   return {wrapper,input};
 }
-function openEditor(date, row = null, existing = null, startPrefill = '') {
+function openEditor(date, row = null, existing = null, startPrefill = '', fromCompleted = false) {
   if (!canLeave()) return;
+  if (fromCompleted) { completedOpen = false; drawCompleted(); }
   if (date.slice(0,7) !== dateKey(shown).slice(0,7)) {
     shown = new Date(`${date}T12:00:00`); expandedDate = null; render();
   }
@@ -352,6 +378,20 @@ function navigate(delta) {
 document.querySelector('#previous').addEventListener('click', () => navigate(-1));
 document.querySelector('#next').addEventListener('click', () => navigate(1));
 document.querySelector('#today').addEventListener('click', () => navigate(null));
+document.querySelector('#completed-toggle').addEventListener('click', () => {
+  if (saving) return;
+  completedOpen = !completedOpen; drawCompleted();
+  if (completedOpen) document.querySelector('#completed-heading')?.focus();
+});
+document.querySelector('#tidy').addEventListener('click', async () => {
+  try {
+    if (!await persist(() => archiveCompleted(localStorage))) return;
+    if (editorSnapshot?.completed && tasks.find(t => t.id === editorSnapshot.id)?.archived) editorSnapshot.archived = true;
+    redrawPreservingEditor();
+    announce('Fullførte oppgaver er ryddet bort. De er fortsatt lagret under Fullført.');
+    document.querySelector('#completed-toggle').focus();
+  } catch (error) { announce(writeError(error),true); document.querySelector('#tidy').focus(); }
+});
 window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('storage', event => {
   if (event.key !== storageKey && event.key !== null) return;

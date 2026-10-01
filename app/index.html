@@ -15,7 +15,9 @@
     <section class="calendar-card" aria-label="Oppgavekalender">
       <div class="toolbar"><div><p class="eyebrow">MIN KALENDER</p><h2 id="month" aria-live="polite"></h2></div><nav aria-label="Velg måned"><button id="previous" aria-label="Forrige måned">←</button><button id="today">I dag</button><button id="next" aria-label="Neste måned">→</button></nav></div>
       <div class="legend" aria-label="Kategorier"><span class="jobb">Jobb</span><span class="skole">Skole</span><span class="familie">Familie</span><span class="ellers">Ellers</span></div>
+      <div class="tidy-toolbar"><button id="tidy">Rydd side</button><button id="completed-toggle" aria-expanded="false" aria-controls="completed-panel">Fullført</button><p>Rydd side skjuler alle fullførte oppgaver fra kalenderen. Du finner dem igjen under Fullført.</p></div>
       <p id="message" role="status" aria-live="polite"></p>
+      <section id="completed-panel" class="completed-panel" aria-labelledby="completed-heading" hidden></section>
       <div class="calendar-scroll"><div id="calendar"></div></div>
       <p class="hint">Trykk på datoen for timeplan, + for ny oppgave, eller på en oppgave for å redigere.</p>
     </section>
