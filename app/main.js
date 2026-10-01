@@ -210,9 +210,51 @@ function drawDay() {
   const addUntimed = element('button', '+ Ny oppgave'); addUntimed.disabled = blocked;
   const date = expandedDate; addUntimed.addEventListener('click', () => openEditor(date)); untimed.append(addUntimed);
   layout.append(timetable, untimed); panel.append(layout); row.after(panel);
-  const firstHour = dated.find(t => t.start)?.start.slice(0, 2) ?? '08';
-  const slot = timeline.querySelector(`[data-hour="${Number(firstHour)}"]`);
+  const slot = timeline.querySelector('[data-hour="12"]');
   timeline.scrollTop = slot.offsetTop;
+}
+function timeField(caption, name, initial) {
+  const wrapper = element('div', undefined, 'time-field');
+  const label = element('label', caption);
+  const input = element('input'); input.type = 'text'; input.name = name;
+  input.placeholder = 'Velg klokkeslett'; input.maxLength = 5; input.value = initial;
+  input.inputMode = 'numeric'; input.autocomplete = 'off';
+  input.setAttribute('aria-describedby', 'time-guidance');
+  label.append(input); wrapper.append(label);
+  const toggle = element('button', 'Velg klokkeslett', 'time-picker-toggle'); toggle.type = 'button';
+  toggle.setAttribute('aria-label', `Velg ${name === 'start' ? 'starttid' : 'sluttid'}`);
+  toggle.setAttribute('aria-expanded', 'false');
+  wrapper.append(toggle);
+  function open() {
+    if (saving) return;
+    document.querySelectorAll('.time-chooser').forEach(node => node.remove());
+    document.querySelectorAll('.time-picker-toggle').forEach(node => node.setAttribute('aria-expanded','false'));
+    const chooser = element('div', undefined, 'time-chooser'); chooser.setAttribute('role','group'); chooser.setAttribute('aria-label', `${caption} – velger`);
+    chooser.addEventListener('input', event => event.stopPropagation());
+    toggle.setAttribute('aria-expanded','true');
+    const current = /^([01]\d|2[0-3]):[0-5]\d$/.test(input.value) ? input.value : '12:00';
+    const hourLabel = element('label','Time'), minuteLabel = element('label','Minutt');
+    const hour = element('select'), minute = element('select');
+    hour.setAttribute('aria-label', `${caption}: time`); minute.setAttribute('aria-label', `${caption}: minutt`);
+    for (let h=0;h<24;h++) { const value=String(h).padStart(2,'0'); const option=element('option',value); option.value=value; hour.append(option); }
+    for (let m=0;m<60;m+=5) { const value=String(m).padStart(2,'0'); const option=element('option',value); option.value=value; minute.append(option); }
+    hour.value=current.slice(0,2);
+    minute.value=Number(current.slice(3))%5===0 ? current.slice(3) : '00';
+    hourLabel.append(hour); minuteLabel.append(minute);
+    const choices=element('div',undefined,'fields'); choices.append(hourLabel,minuteLabel);
+    const use=element('button','Bruk klokkeslett','primary'); use.type='button';
+    const cancel=element('button','Lukk'); cancel.type='button';
+    const clear=element('button','Fjern klokkeslett'); clear.type='button';
+    const close=()=>{chooser.remove();toggle.setAttribute('aria-expanded','false');input.focus();};
+    use.addEventListener('click',()=>{input.value=`${hour.value}:${minute.value}`;input.dispatchEvent(new Event('input',{bubbles:true}));close();});
+    clear.addEventListener('click',()=>{input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));close();});
+    cancel.addEventListener('click',close);
+    chooser.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}});
+    const actions=element('div',undefined,'actions');actions.append(use,clear,cancel);
+    chooser.append(choices,actions);wrapper.append(chooser);hour.focus();
+  }
+  toggle.addEventListener('click',open);
+  return {wrapper,input};
 }
 function openEditor(date, row = null, existing = null, startPrefill = '') {
   if (!canLeave()) return;
@@ -241,12 +283,12 @@ function openEditor(date, row = null, existing = null, startPrefill = '') {
   for (const name of categories) { const option = element('option', name); option.value = name; category.append(option); }
   category.value = existing?.category ?? 'Ellers'; categoryLabel.append(category); fields.append(dateLabel, categoryLabel);
   const times = element('div', undefined, 'fields');
-  const startLabel = element('label', 'Start (valgfritt)');
-  const start = element('input'); start.type = 'time'; start.name = 'start'; start.step = '60'; start.value = existing?.start ?? startPrefill; startLabel.append(start);
-  const endLabel = element('label', 'Slutt (valgfritt)');
-  const end = element('input'); end.type = 'time'; end.name = 'end'; end.step = '60'; end.value = existing?.end ?? ''; endLabel.append(end);
-  times.append(startLabel, endLabel);
-  const timeHelp = element('p', 'La begge stå tomme for en oppgave uten klokkeslett. Start og slutt må være samme dag.', 'day-help');
+  const startField = timeField('Start (valgfritt)', 'start', existing?.start ?? startPrefill);
+  const endField = timeField('Slutt (valgfritt)', 'end', existing?.end ?? '');
+  const start = startField.input, end = endField.input;
+  times.append(startField.wrapper, endField.wrapper);
+  const timeHelp = element('p', 'Velg eller skriv HH:mm i femminutterssteg (00, 05, 10 … 55). La begge stå tomme for ingen klokkeslett. Start og slutt må være samme dag.', 'day-help');
+  timeHelp.id = 'time-guidance';
   const error = element('p', '', 'error'); error.setAttribute('role', 'alert');
   const actions = element('div', undefined, 'actions');
   const save = element('button', 'Lagre oppgave', 'primary'); save.type = 'submit';
@@ -272,6 +314,11 @@ function openEditor(date, row = null, existing = null, startPrefill = '') {
     const name = title.value.trim();
     if (!name) { error.textContent = 'Skriv en tittel på oppgaven.'; title.focus(); return; }
     if (!validDate(dateInput.value)) { error.textContent = 'Velg en gyldig dato.'; return; }
+    for (const field of [start,end]) {
+      if (field.value && field.value !== original?.[field.name] && Number(field.value.slice(3)) % 5 !== 0) {
+        error.textContent = 'Velg minutter i femminutterssteg: 00, 05, 10, 15 … 55.'; field.focus(); return;
+      }
+    }
     if (!validTimes(start.value, end.value)) {
       error.textContent = 'Fyll inn både start og slutt, med slutt senere enn start samme dag, eller la begge stå tomme.';
       (!start.value ? start : end).focus(); return;

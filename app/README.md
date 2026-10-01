@@ -10,7 +10,9 @@ node app/server.mjs
 
 Open http://localhost:5173 in Edge or Chrome. Keep the terminal running; Ctrl+C stops the server. If the port is occupied, stop the previous instance rather than selecting a different port. Use the same address and browser profile each time: localhost and 127.0.0.1 have separate storage.
 
-The app supports month navigation, today marking, inline task creation/editing, four categories, completion/reopening, confirmed deletion and persistence. Click a date to expand its timetable and right-hand untimed list. Optional start/end times must both be supplied or both empty, with end later than start on the same day. Hour buttons prefill the start only; fields support minutes. The scrollable timetable includes all 24 hours. Saving collapses the expanded day.
+The app supports month navigation, today marking, inline task creation/editing, four categories, completion/reopening, confirmed deletion and persistence. Click a date to expand its timetable and right-hand untimed list. Optional start/end times must both be supplied or both empty, with end later than start on the same day. Hour buttons prefill the start only. The scrollable timetable includes all 24 hours and opens at noon. Saving collapses the expanded day.
+
+The time chooser previews 12:00 for an empty field, with hour and five-minute selects (00,05,...55). Apply commits the choice; opening/closing does not assign a time. Users can also type HH:mm in five-minute steps. Existing off-step saved times are preserved when unchanged; editing their titles/categories does not round them. Clear both fields to remove times. Test with `node app/time-picker-check.mjs` using the same optional Playwright setup below.
 
 Overlapping unfinished tasks on the same date have red titles and an "Overlapper" cue. Touching intervals do not conflict. Completed tasks remain visible but stop contributing conflicts. Clearing both times moves a task into the selected day's untimed list. Existing tasks without time fields remain valid without migration. All tasks still require a date. Undated tasks, custom categories and AI are later increments. No sample tasks are inserted into user storage.
 
