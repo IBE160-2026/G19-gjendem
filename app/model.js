@@ -12,7 +12,8 @@ export function validDate(value) {
 export function validateTask(task) {
   return typeof task.id === 'string' && task.id.length > 0 &&
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
-    validDate(task.date) && categories.includes(task.category);
+    validDate(task.date) && categories.includes(task.category) &&
+    (task.completed === undefined || typeof task.completed === 'boolean');
 }
 export function readTasks(storage) {
   const raw = storage.getItem(storageKey);
@@ -37,4 +38,21 @@ export function monthDays(year, month) {
   const count = new Date(year, month + 1, 0).getDate();
   return Array.from({length: Math.ceil((offset + count) / 7) * 7}, (_, i) =>
     i < offset || i >= offset + count ? null : dateKey(new Date(year, month, i - offset + 1)));
+}
+
+export function changeTask(storage, id, change, expected) {
+  const tasks = readTasks(storage);
+  const index = tasks.findIndex(task => task.id === id);
+  if (index === -1 || (expected && JSON.stringify(tasks[index]) !== JSON.stringify(expected))) {
+    const error = new Error('Task changed in another tab'); error.code = 'conflict'; throw error;
+  }
+  const next = [...tasks];
+  if (change === null) next.splice(index, 1);
+  else {
+    const updated = {...tasks[index], ...change, id};
+    if (!validateTask(updated)) throw new Error('Invalid task');
+    next[index] = updated;
+  }
+  storage.setItem(storageKey, JSON.stringify({version: 1, tasks: next}));
+  return next;
 }
