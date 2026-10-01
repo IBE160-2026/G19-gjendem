@@ -1,5 +1,22 @@
 export const categories = ['Jobb', 'Skole', 'Familie', 'Ellers'];
 export const storageKey = 'smart-todo.v1';
+export function validTimes(start, end) {
+  if ((start === undefined || start === '') && (end === undefined || end === '')) return true;
+  return typeof start === 'string' && typeof end === 'string' &&
+    /^([01]\d|2[0-3]):[0-5]\d$/.test(start) && /^([01]\d|2[0-3]):[0-5]\d$/.test(end) && start < end;
+}
+export function conflictingIds(tasks) {
+  const timed = tasks.filter(t => t.start && t.end && !t.completed);
+  const conflicts = new Set();
+  for (let i = 0; i < timed.length; i++) for (let j = i + 1; j < timed.length; j++) {
+    const a = timed[i], b = timed[j];
+    if (a.date === b.date && a.start < b.end && b.start < a.end) { conflicts.add(a.id); conflicts.add(b.id); }
+  }
+  return conflicts;
+}
+export function byTime(a, b) {
+  return (a.start || '99:99').localeCompare(b.start || '99:99') || a.title.localeCompare(b.title, 'nb');
+}
 export function dateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
@@ -13,7 +30,7 @@ export function validateTask(task) {
   return typeof task.id === 'string' && task.id.length > 0 &&
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
     validDate(task.date) && categories.includes(task.category) &&
-    (task.completed === undefined || typeof task.completed === 'boolean');
+    (task.completed === undefined || typeof task.completed === 'boolean') && validTimes(task.start, task.end);
 }
 export function readTasks(storage) {
   const raw = storage.getItem(storageKey);

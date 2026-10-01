@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate, monthDays, readTasks, addTask, changeTask, storageKey} from './model.js';
+import {validDate, validTimes, conflictingIds, byTime, monthDays, readTasks, addTask, changeTask, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
 test('calendar dates reject impossible dates and support leap years', () => {
@@ -52,4 +52,26 @@ test('failed edit, completion and deletion preserve saved records', () => {
     assert.throws(() => changeTask(fail, task.id, change), /quota/);
     assert.deepEqual(readTasks(storage), [task]);
   }
+});
+test('optional times require a complete same-day interval with minute precision', () => {
+  assert.equal(validTimes(undefined, undefined), true);
+  assert.equal(validTimes('', ''), true);
+  assert.equal(validTimes('00:00', '23:59'), true);
+  assert.equal(validTimes('09:15', '10:05'), true);
+  for (const pair of [['09:00',''],['','10:00'],['10:00','09:00'],['10:00','10:00'],['24:00','25:00'],[null,null],['9:00','10:00']]) assert.equal(validTimes(...pair), false);
+  const storage = memory(); addTask(storage, task);
+  changeTask(storage, task.id, {start:'09:15',end:'10:05'});
+  assert.equal(readTasks(storage)[0].start, '09:15');
+  changeTask(storage, task.id, {start:'',end:''});
+  assert.equal(readTasks(storage)[0].end, '');
+});
+test('conflicts mark both unfinished tasks, exclude touching edges and other days', () => {
+  const a = {...task,start:'09:00',end:'10:00'};
+  const b = {...task,id:'two',start:'09:59',end:'11:00'};
+  assert.deepEqual([...conflictingIds([a,b])], ['one','two']);
+  assert.equal(conflictingIds([a,{...b,start:'10:00'}]).size, 0);
+  assert.equal(conflictingIds([a,{...b,completed:true}]).size, 0);
+  assert.equal(conflictingIds([a,{...b,date:'2026-09-28'}]).size, 0);
+  assert.equal(conflictingIds([a,{...task,id:'untimed'}]).size, 0);
+  assert.deepEqual([{...task,id:'untimed'},b,a].sort(byTime).map(t=>t.id), ['one','two','untimed']);
 });

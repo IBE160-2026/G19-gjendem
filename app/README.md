@@ -10,7 +10,9 @@ node app/server.mjs
 
 Open http://localhost:5173 in Edge or Chrome. Keep the terminal running; Ctrl+C stops the server. If the port is occupied, stop the previous instance rather than selecting a different port. Use the same address and browser profile each time: localhost and 127.0.0.1 have separate storage.
 
-The app supports month navigation, today marking, inline task creation/editing, four categories, completion/reopening, confirmed deletion and persistence. All tasks currently require a date. Scheduling, undated tasks, custom categories, sidebars and AI are later increments of the PRD. No sample tasks are inserted into user storage.
+The app supports month navigation, today marking, inline task creation/editing, four categories, completion/reopening, confirmed deletion and persistence. Click a date to expand its timetable and right-hand untimed list. Optional start/end times must both be supplied or both empty, with end later than start on the same day. Hour buttons prefill the start only; fields support minutes. The scrollable timetable includes all 24 hours. Saving collapses the expanded day.
+
+Overlapping unfinished tasks on the same date have red titles and an "Overlapper" cue. Touching intervals do not conflict. Completed tasks remain visible but stop contributing conflicts. Clearing both times moves a task into the selected day's untimed list. Existing tasks without time fields remain valid without migration. All tasks still require a date. Undated tasks, custom categories, left upcoming sidebar and AI are later increments. No sample tasks are inserted into user storage.
 
 Click a task title to edit its title, date or category. Use its checkbox to complete/reopen without opening the editor; completed titles stay visible with strikethrough. Delete is available inside the editor and requires confirmation. Legacy records without a completed field are treated as unfinished without an automatic migration. Stale edits/deletes are rejected if another tab changed the record; cancel and reopen to use the latest version.
 
@@ -21,5 +23,7 @@ Run automated model checks:
 ```powershell
 node --test app/model.test.mjs
 ```
+
+Optional browser suites (with the local server running and Playwright installed or PLAYWRIGHT_MODULE set to its module path): `node app/browser-check.mjs` and `node app/timetable-check.mjs`. Both use isolated browser contexts, not the user's calendar data.
 
 Manual acceptance: add a task using a day's plus, confirm Ellers is the default, select another category and date, save, reload and verify it remains. Check previous/next month and I dag. Enter a blank title; it must not save. Cancel an edited form and verify the discard confirmation. The first working slice uses a small allowlisted Node HTTP server instead of the proposed Vite toolchain; the app itself is standard browser HTML/CSS/JavaScript.
