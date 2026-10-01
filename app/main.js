@@ -13,7 +13,8 @@ let conflicts = new Set();
 const expandedPeriods = new Set();
 let sidebarDate = '';
 let completedOpen = false;
-const fullDate = value => new Intl.DateTimeFormat('nb-NO', {day: 'numeric', month: 'long', year: 'numeric'}).format(new Date(`${value}T12:00:00`));
+let undatedOpen = false;
+const fullDate = value => !value ? 'Uten dato' : new Intl.DateTimeFormat('nb-NO', {day: 'numeric', month: 'long', year: 'numeric'}).format(new Date(`${value}T12:00:00`));
 const element = (tag, text, className) => {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = text;
@@ -53,6 +54,7 @@ function writeError(error) {
 }
 function render() {
   editorSnapshot = null;
+  document.querySelector('#loose-editor').replaceChildren();
   conflicts = conflictingIds(tasks);
   const year = shown.getFullYear(), month = shown.getMonth();
   document.querySelector('#month').textContent = new Intl.DateTimeFormat('nb-NO', {month: 'long', year: 'numeric'}).format(shown);
@@ -95,6 +97,23 @@ function render() {
   if (expandedDate) drawDay();
   drawUpcoming();
   drawCompleted();
+  drawUndated();
+}
+function drawUndated() {
+  const panel = document.querySelector('#undated-panel');
+  const items = tasks.filter(t => !t.date && !t.archived).sort(byTime);
+  const toggle = document.querySelector('#undated-toggle');
+  toggle.textContent = `Uten dato (${items.length})`;
+  toggle.setAttribute('aria-expanded', String(undatedOpen));
+  panel.hidden = !undatedOpen; panel.replaceChildren();
+  if (!undatedOpen) return;
+  const heading = element('h3', 'Oppgaver uten dato'); heading.id = 'undated-heading'; heading.tabIndex = -1;
+  panel.append(heading, element('p', 'Skriv ned det du vil huske. Åpne oppgaven og velg dato når du vil plassere den i kalenderen.', 'day-help'));
+  if (blocked) { panel.append(element('p', 'Kunne ikke lese oppgavene. Ingen data er endret.', 'error')); return; }
+  if (!items.length) panel.append(element('p', 'Ingen oppgaver uten dato.', 'day-help'));
+  for (const task of items) panel.append(taskCard(task, 'undated-list'));
+  const add = element('button', '+ Ny oppgave uten dato');
+  add.addEventListener('click', () => openEditor('')); panel.append(add);
 }
 function drawCompleted() {
   const panel = document.querySelector('#completed-panel');
@@ -106,7 +125,7 @@ function drawCompleted() {
   panel.replaceChildren();
   if (!completedOpen) return;
   const heading = element('h3','Fullførte oppgaver'); heading.id = 'completed-heading'; heading.tabIndex = -1;
-  panel.append(heading,element('p','Her er alle fullførte oppgaver. Fjern avkryssingen for å legge en oppgave tilbake i kalenderen.','day-help'));
+  panel.append(heading,element('p','Her er alle fullførte oppgaver. Fjern avkryssingen for å legge en oppgave tilbake i oversikten.','day-help'));
   if (blocked) {panel.append(element('p','Kunne ikke lese oppgavene. Ingen data er endret.','error'));return;}
   if (!items.length) panel.append(element('p','Ingen fullførte oppgaver ennå.','day-help'));
   for (const task of items) panel.append(taskCard(task,'completed-list'));
@@ -116,7 +135,7 @@ function redrawPreservingEditor() {
   const scrollTop = document.querySelector('.timeline')?.scrollTop;
   if (editor) editor.remove();
   render();
-  if (editor) { document.querySelector('#day-editor').append(editor); editorSnapshot = snapshot; }
+  if (editor) { document.getElementById(editor.dataset.host).append(editor); editorSnapshot = snapshot; }
   if (scrollTop !== undefined && document.querySelector('.timeline')) document.querySelector('.timeline').scrollTop = scrollTop;
 }
 function drawUpcoming() {
@@ -175,7 +194,7 @@ function taskCard(task, surface) {
     edit.title = task.title;
     if (surface !== 'sidebar-today') edit.append(element('small', fullDate(task.date), 'task-date'));
   }
-  if (surface === 'completed-list') edit.append(element('small',fullDate(task.date)),element('small',task.archived ? 'Ryddet bort fra kalenderen' : 'Vises fortsatt i kalenderen'));
+  if (surface === 'completed-list') edit.append(element('small',fullDate(task.date)),element('small',task.archived ? 'Ryddet bort fra oversikten' : 'Vises fortsatt i oversikten'));
   card.classList.toggle('completed', Boolean(task.completed));
   if (conflicts.has(task.id)) { card.classList.add('conflict'); edit.append(element('small', 'Overlapper', 'conflict-label')); }
   edit.addEventListener('click', () => openEditor(task.date, null, task, '', surface === 'completed-list'));
@@ -288,13 +307,16 @@ function timeField(caption, name, initial) {
 }
 function openEditor(date, row = null, existing = null, startPrefill = '', fromCompleted = false) {
   if (!canLeave()) return;
+  document.querySelector('#editor')?.remove();
   if (fromCompleted) { completedOpen = false; drawCompleted(); }
-  if (date.slice(0,7) !== dateKey(shown).slice(0,7)) {
+  if (date && date.slice(0,7) !== dateKey(shown).slice(0,7)) {
     shown = new Date(`${date}T12:00:00`); expandedDate = null; render();
   }
-  expandedDate = date; drawDay();
+  expandedDate = date || null; drawDay();
+  if (!date) { undatedOpen = true; drawUndated(); }
   dirty = false;
   const panel = element('section', undefined, 'editor'); panel.id = 'editor';
+  panel.dataset.host = date ? 'day-editor' : 'loose-editor';
   // Snapshot prevents an old editor from overwriting a newer value from another tab.
   const original = existing ? structuredClone(existing) : null;
   editorSnapshot = original;
@@ -310,7 +332,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
   description.value = existing?.description ?? ''; descriptionLabel.append(description);
   const fields = element('div', undefined, 'fields');
   const dateLabel = element('label', 'Dato');
-  const dateInput = element('input'); dateInput.type = 'date'; dateInput.name = 'date'; dateInput.required = true;
+  const dateInput = element('input'); dateInput.type = 'date'; dateInput.name = 'date';
   dateInput.min = '1000-01-01'; dateInput.max = '9999-12-31'; dateInput.value = date; dateLabel.append(dateInput);
   const categoryLabel = element('label', 'Kategori');
   const category = element('select'); category.name = 'category';
@@ -324,12 +346,14 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
   times.append(startField.wrapper, endField.wrapper);
   const timeHelp = element('p', 'Velg eller skriv HH:mm i femminutterssteg (00, 05, 10 … 55). La begge stå tomme for ingen klokkeslett. Start og slutt må være samme dag.', 'day-help');
   timeHelp.id = 'time-guidance';
+  const dateHelp = element('p', 'Dato er valgfritt. La datoen stå tom for å lagre under Uten dato. Velg en dato hvis du vil bruke klokkeslett.', 'day-help');
   const error = element('p', '', 'error'); error.setAttribute('role', 'alert');
   const actions = element('div', undefined, 'actions');
   const save = element('button', 'Lagre oppgave', 'primary'); save.type = 'submit';
   const cancel = element('button', 'Avbryt'); cancel.type = 'button';
-  cancel.addEventListener('click', () => { if (canLeave()) { dirty = false; expandedDate = null; load(); render(); calendar.querySelector(`[data-date="${date}"] .add`)?.focus(); } });
-  actions.append(save, cancel); form.append(titleLabel, descriptionLabel, fields, times, timeHelp, error, actions); panel.append(form);
+  const focusOrigin = () => (calendar.querySelector(`[data-date="${date}"] .add`) ?? document.querySelector('#undated-toggle')).focus();
+  cancel.addEventListener('click', () => { if (canLeave()) { dirty = false; expandedDate = null; load(); render(); focusOrigin(); } });
+  actions.append(save, cancel); form.append(titleLabel, descriptionLabel, fields, dateHelp, times, timeHelp, error, actions); panel.append(form);
   if (existing) {
     const remove = element('button', 'Slett oppgave', 'danger'); remove.type = 'button';
     remove.addEventListener('click', async () => {
@@ -337,18 +361,21 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
       try {
         if (!await persist(() => changeTask(localStorage, original.id, null, original))) return;
         dirty = false; expandedDate = null; render(); announce(`«${original.title}» er slettet.`);
-        calendar.querySelector(`[data-date="${date}"] .add`)?.focus();
+        focusOrigin();
       } catch (failure) { error.textContent = writeError(failure); }
     });
     actions.append(remove);
   }
-  document.querySelector('#day-editor').append(panel); title.focus();
+  document.getElementById(panel.dataset.host).append(panel); title.focus();
   form.addEventListener('input', () => { dirty = true; });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const name = title.value.trim();
     if (!name) { error.textContent = 'Skriv en tittel på oppgaven.'; title.focus(); return; }
-    if (!validDate(dateInput.value)) { error.textContent = 'Velg en gyldig dato.'; return; }
+    if (dateInput.value && !validDate(dateInput.value)) { error.textContent = 'Velg en gyldig dato.'; return; }
+    if (!dateInput.value && (start.value || end.value)) {
+      error.textContent = 'Velg en dato for klokkeslettene, eller fjern begge klokkeslett for å lagre uten dato.'; dateInput.focus(); return;
+    }
     for (const field of [start,end]) {
       if (field.value && field.value !== original?.[field.name] && Number(field.value.slice(3)) % 5 !== 0) {
         error.textContent = 'Velg minutter i femminutterssteg: 00, 05, 10, 15 … 55.'; field.focus(); return;
@@ -363,9 +390,10 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
       if (!await persist(() => original
         ? changeTask(localStorage, task.id, task, original)
         : addTask(localStorage, task))) return;
-      shown = new Date(`${task.date}T12:00:00`); dirty = false; expandedDate = null;
+      if (task.date) shown = new Date(`${task.date}T12:00:00`); else undatedOpen = true;
+      dirty = false; expandedDate = null;
       render(); announce(`«${name}» er lagret.`);
-      document.querySelector('#today').focus();
+      document.querySelector(task.date ? '#today' : '#undated-toggle').focus();
     } catch (failure) { error.textContent = writeError(failure); }
   });
 }
@@ -378,6 +406,11 @@ function navigate(delta) {
 document.querySelector('#previous').addEventListener('click', () => navigate(-1));
 document.querySelector('#next').addEventListener('click', () => navigate(1));
 document.querySelector('#today').addEventListener('click', () => navigate(null));
+document.querySelector('#undated-toggle').addEventListener('click', () => {
+  if (saving) return;
+  undatedOpen = !undatedOpen; drawUndated();
+  if (undatedOpen) document.querySelector('#undated-heading')?.focus();
+});
 document.querySelector('#completed-toggle').addEventListener('click', () => {
   if (saving) return;
   completedOpen = !completedOpen; drawCompleted();

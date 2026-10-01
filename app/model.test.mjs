@@ -3,6 +3,24 @@ import assert from 'node:assert/strict';
 import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
+
+test('undated tasks persist, can be scheduled, archived and restored without data loss', () => {
+  const storage = memory();
+  const undated = {...task,date:'',description:'Keep details'};
+  addTask(storage,undated);
+  assert.deepEqual(readTasks(storage),[undated]);
+  assert.deepEqual(upcomingGroups(readTasks(storage)),{today:[],week:[],upcoming:[]});
+  for (const date of [undefined,null,'invalid']) assert.throws(()=>addTask(memory(),{...task,date}));
+  assert.throws(()=>changeTask(storage,task.id,{start:'12:00',end:'13:00'}));
+  changeTask(storage,task.id,{date:task.date,start:'12:00',end:'13:00'});
+  assert.throws(()=>changeTask(storage,task.id,{date:''}));
+  changeTask(storage,task.id,{date:'',start:'',end:'',completed:true});
+  archiveCompleted(storage);
+  changeTask(storage,task.id,{completed:false});
+  assert.equal(readTasks(storage)[0].date,'');
+  assert.equal(readTasks(storage)[0].description,'Keep details');
+  assert.equal(readTasks(storage)[0].archived,false);
+});
 test('calendar dates reject impossible dates and support leap years', () => {
   assert.equal(validDate('2024-02-29'), true); assert.equal(validDate('2026-02-29'), false);
   assert.equal(validDate('2026-13-01'), false); assert.equal(validDate('2026-9-1'), false);

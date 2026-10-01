@@ -23,7 +23,7 @@ export function upcomingGroups(tasks, now = new Date()) {
   const nextWeek = dateKey(monday);
   const result = {today: [], week: [], upcoming: []};
   for (const task of tasks) {
-    if (task.archived) continue;
+    if (task.archived || !task.date) continue;
     if (task.date === today) result.today.push(task);
     else if (task.date > today && task.date < nextWeek) result.week.push(task);
     else if (task.date >= nextWeek) result.upcoming.push(task);
@@ -43,7 +43,7 @@ export function validDate(value) {
 export function validateTask(task) {
   return typeof task.id === 'string' && task.id.length > 0 &&
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
-    validDate(task.date) && categories.includes(task.category) &&
+    (validDate(task.date) || task.date === '') && (task.date !== '' || (!task.start && !task.end)) && categories.includes(task.category) &&
     (task.description === undefined || typeof task.description === 'string') &&
     (task.archived === undefined || typeof task.archived === 'boolean') && (!task.archived || task.completed === true) &&
     (task.completed === undefined || typeof task.completed === 'boolean') && validTimes(task.start, task.end);
