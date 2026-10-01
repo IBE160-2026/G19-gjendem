@@ -233,6 +233,10 @@ function timeField(caption, name, initial) {
     chooser.addEventListener('input', event => event.stopPropagation());
     toggle.setAttribute('aria-expanded','true');
     const current = /^([01]\d|2[0-3]):[0-5]\d$/.test(input.value) ? input.value : '12:00';
+    if (!input.value) {
+      input.value = current;
+      input.dispatchEvent(new Event('input', {bubbles:true}));
+    }
     const hourLabel = element('label','Time'), minuteLabel = element('label','Minutt');
     const hour = element('select'), minute = element('select');
     hour.setAttribute('aria-label', `${caption}: time`); minute.setAttribute('aria-label', `${caption}: minutt`);
@@ -242,15 +246,16 @@ function timeField(caption, name, initial) {
     minute.value=Number(current.slice(3))%5===0 ? current.slice(3) : '00';
     hourLabel.append(hour); minuteLabel.append(minute);
     const choices=element('div',undefined,'fields'); choices.append(hourLabel,minuteLabel);
-    const use=element('button','Bruk klokkeslett','primary'); use.type='button';
     const cancel=element('button','Lukk'); cancel.type='button';
     const clear=element('button','Fjern klokkeslett'); clear.type='button';
     const close=()=>{chooser.remove();toggle.setAttribute('aria-expanded','false');input.focus();};
-    use.addEventListener('click',()=>{input.value=`${hour.value}:${minute.value}`;input.dispatchEvent(new Event('input',{bubbles:true}));close();});
+    const update=()=>{input.value=`${hour.value}:${minute.value}`;input.dispatchEvent(new Event('input',{bubbles:true}));};
+    hour.addEventListener('change',update);
+    minute.addEventListener('change',update);
     clear.addEventListener('click',()=>{input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));close();});
     cancel.addEventListener('click',close);
     chooser.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();}});
-    const actions=element('div',undefined,'actions');actions.append(use,clear,cancel);
+    const actions=element('div',undefined,'actions');actions.append(clear,cancel);
     chooser.append(choices,actions);wrapper.append(chooser);hour.focus();
   }
   toggle.addEventListener('click',open);
