@@ -77,8 +77,9 @@ The current app has no login, sharing, external calendar integration, automatic 
 - [Product brief](product-brief.md) — purpose, scope, measurable targets and the 6 October feedback response.
 - [PRD](./_bmad-output/planning-artifacts/prds/prd-smart-to-do-2026-09-27/prd.md) — functional requirements. Reconciled on 13 October with approved completion and time rules; includes delivered versus remaining work.
 - [UX design](./_bmad-output/planning-artifacts/ux-designs/ux-smart-to-do-2026-09-27/DESIGN.md) and [interaction design](./_bmad-output/planning-artifacts/ux-designs/ux-smart-to-do-2026-09-27/EXPERIENCE.md).
+- [Epics and stories overview](./_bmad-output/planning-artifacts/epics-and-stories-overview.md) — approved remaining calendar work and deferred AI stage; detailed acceptance criteria are next.
 - [Technical plan](./_bmad-output/planning-artifacts/technical-plan-smart-to-do.md).
 - [Implementation records](./_bmad-output/implementation-artifacts/) — individual changes, decisions, verification and review notes.
 - [Detailed app guide](app/README.md).
 
-The current implementation uses plain HTML, CSS and JavaScript with a small Node.js server. Historical planning documents describe the plan at the time; implementation records and commits show later decisions. Epics/stories for remaining work and an explicit mapping from tests to PRD requirements are still to be prepared.
+The current implementation uses plain HTML, CSS and JavaScript with a small Node.js server. Historical planning documents describe the plan at the time; implementation records and commits show later decisions. The approved epics/stories overview records remaining work. Detailed story acceptance criteria, reconciliation of the newly approved scope with PRD/UX, and an explicit mapping from tests to PRD requirements are still to be prepared.
