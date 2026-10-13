@@ -13,11 +13,11 @@ Complete and test the calendar (Epics 1–5) before selecting or implementing th
 ## Epic 1 — Review past unfinished tasks
 
 - **1.1 Opening notice:** When the calendar opens, show a notice with the count of unfinished tasks dated before today, if any exist. This is an in-app notice, not an operating-system notification or background reminder. Today's tasks and undated tasks do not trigger it.
-- **1.2 Review list:** Open the relevant tasks from the notice, showing title, date and category.
+- **1.2 Review window:** Open a large in-app overlay covering nearly the whole screen, showing all relevant tasks together with title, date and category, with scrolling when necessary. Include "Lagre som utført", "Endre" and an upper-left close cross. Outside clicks and Escape do not dismiss it.
 - **1.3 Act on a task:** Let the user change its date or mark it complete.
-- **1.4 Keep unresolved work:** Leave untreated tasks available for the next visit. Update the count after changes and remove the notice when none remain.
+- **1.4 Keep unresolved work:** Closing with the cross leaves tasks unchanged and causes a new notice on the next calendar visit if they still qualify. Update the count after changes and remove the notice when none remain.
 
-No additional notices for today's tasks, time conflicts or undated tasks were selected. Exact list placement and interaction details will be settled in the detailed stories.
+No additional notices for today's tasks, time conflicts or undated tasks were selected. The large review window and explicit dismissal controls are confirmed. All qualifying tasks appear together in the window. Each task has its own completion/edit actions. The window remains open while tasks remain, updating the list and count after successful saves. It closes when all qualifying tasks are resolved or the upper-left cross is used; closing with the cross preserves unresolved tasks for the next visit.
 
 ## Epic 2 — Organise tasks by category
 
