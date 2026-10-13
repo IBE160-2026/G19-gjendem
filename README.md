@@ -75,7 +75,7 @@ The current app has no login, sharing, external calendar integration, automatic 
 ## Project documentation
 
 - [Product brief](product-brief.md) — purpose, scope, measurable targets and the 6 October feedback response.
-- [PRD](./_bmad-output/planning-artifacts/prds/prd-smart-to-do-2026-09-27/prd.md) — functional requirements. Some earlier completion/time-rule wording still needs updating to match subsequent approved changes.
+- [PRD](./_bmad-output/planning-artifacts/prds/prd-smart-to-do-2026-09-27/prd.md) — functional requirements. Reconciled on 13 October with approved completion and time rules; includes delivered versus remaining work.
 - [UX design](./_bmad-output/planning-artifacts/ux-designs/ux-smart-to-do-2026-09-27/DESIGN.md) and [interaction design](./_bmad-output/planning-artifacts/ux-designs/ux-smart-to-do-2026-09-27/EXPERIENCE.md).
 - [Technical plan](./_bmad-output/planning-artifacts/technical-plan-smart-to-do.md).
 - [Implementation records](./_bmad-output/implementation-artifacts/) — individual changes, decisions, verification and review notes.
