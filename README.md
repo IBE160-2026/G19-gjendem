@@ -24,6 +24,7 @@ No package installation, account or API key is needed to run the current app. If
 - Create, edit, complete, reopen and delete tasks, with optional descriptions and dates.
 - Jobb (blue), Skole (yellow), Familie (green) and Ellers (light brown), with Ellers as the default.
 - **Vis kategori** filters every task view; **Vis alle** restores the overview. **+ Ny kategori** saves a custom name and colour. Conflicts still consider hidden categories.
+- **Administrer kategorier** edits names and colours with presets, custom colour and a preview. Save applies to all linked tasks, including completed tasks; Cancel discards the row's draft. Renamed Ellers remains the default.
 - Optional start/end times on the same date. Time choices use five-minute steps; the timetable opens at noon. Overlapping unfinished tasks show red text and an overlap label. Tasks that end exactly when another starts do not conflict.
 - Left sidebar for today, the rest of the week and next week onwards, with two tasks per section and inline expansion.
 - **Uten dato** for tasks to schedule later, **Rydd side** to hide completed tasks without deleting them, and **Fullført** to view or reopen completed tasks.
@@ -31,7 +32,7 @@ No package installation, account or API key is needed to run the current app. If
 
 ## Planned work
 
-Stage 1 still needs a separate overview of past unfinished tasks and editing existing category names/colours. Filtering and creating additional categories are available. Past dated tasks can currently be found by navigating to their calendar month.
+Stage 1 still needs a separate overview of past unfinished tasks, appearance customisation and Norwegian public holidays. Category filtering, creation and editing are available. Past dated tasks can currently be found by navigating to their calendar month.
 
 Stage 2 will add AI category suggestions that the user accepts, rejects or changes. **AI is not implemented yet.** Before that stage, we will create epics and stories, select a service, document costs and what data is sent, and keep the API key on the server in an uncommitted `.env` file. No provider or model has been selected. The current app does not read `.env` or call an AI service.
 
@@ -62,6 +63,7 @@ node app/description-check.mjs
 node app/completed-check.mjs
 node app/undated-check.mjs
 node app/categories-check.mjs
+node app/category-edit-check.mjs
 ```
 
 These suites cover task editing, completion and deletion; timetables and conflicts; week boundaries and sidebar expansion; time selection; descriptions; cleanup/restoration; and undated task scheduling. They use isolated browser contexts, not the user's saved tasks. Generated screenshots are local test artifacts.

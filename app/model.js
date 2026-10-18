@@ -50,6 +50,11 @@ export function validateTask(task, names = categories) {
 }
 const defaultColors = ['#4a7fc5', '#b99a26', '#538759', '#a27c55'];
 const categoryKey = name => name.normalize('NFKC').toLocaleLowerCase('nb-NO');
+function categoryDefinitions(state) {
+  return [...categories.map((id,i)=>({id,name:id,color:defaultColors[i]})),
+    ...(state.customCategories ?? []).map(c=>({id:c.name,name:c.name,color:c.color}))]
+    .map(c=>({...c,...(Object.hasOwn(state.categoryOverrides ?? {},c.id) ? state.categoryOverrides[c.id] : {})}));
+}
 export function readState(storage) {
   const raw = storage.getItem(storageKey);
   const data = raw === null ? {version:1, tasks:[]} : JSON.parse(raw);
@@ -57,11 +62,27 @@ export function readState(storage) {
   const custom = data.customCategories === undefined ? [] : data.customCategories;
   if (!Array.isArray(custom) || !custom.every(c => c && typeof c.name === 'string' && c.name === c.name.trim() && c.name.length > 0 && c.name.length <= 40 && /^#[0-9a-f]{6}$/i.test(c.color))) throw new Error('Invalid categories');
   const names = [...categories, ...custom.map(c => c.name)];
+  if (data.categoryOverrides !== undefined) {
+    const overrides=data.categoryOverrides;
+    if (!overrides || typeof overrides!=='object' || Array.isArray(overrides) || Object.entries(overrides).some(([id,c])=>!names.includes(id) || !c || typeof c.name!=='string' || c.name!==c.name.trim() || !c.name || c.name.length>40 || !/^#[0-9a-f]{6}$/i.test(c.color) || Object.keys(c).some(key=>!['name','color'].includes(key)))) throw new Error('Invalid category overrides');
+  }
+  const displayNames=categoryDefinitions(data).map(c=>categoryKey(c.name));
+  if (new Set(displayNames).size!==displayNames.length) throw new Error('Duplicate categories');
   if (new Set(names.map(categoryKey)).size !== names.length || !data.tasks.every(t => t && validateTask(t, names)) || new Set(data.tasks.map(t=>t.id)).size !== data.tasks.length) throw new Error('Invalid saved data');
   return data;
 }
 export function readCategories(storage) {
-  return [...categories.map((name,i)=>({name,color:defaultColors[i]})), ...(readState(storage).customCategories ?? [])];
+  return categoryDefinitions(readState(storage));
+}
+export function editCategory(storage,id,name,color,expected) {
+  const state=readState(storage), list=categoryDefinitions(state), current=list.find(c=>c.id===id);
+  if (!current || (expected && JSON.stringify(current)!==JSON.stringify(expected))) throw new Error('Kategorien er endret i en annen fane. Avbryt og åpne listen på nytt.');
+  name=name.trim();
+  if (!name || name.length>40) throw new Error('Skriv et kategorinavn på 1–40 tegn.');
+  if (list.some(c=>c.id!==id && categoryKey(c.name)===categoryKey(name))) throw new Error('En kategori med dette navnet finnes allerede.');
+  if (!/^#[0-9a-f]{6}$/i.test(color)) throw new Error('Velg en gyldig farge.');
+  storage.setItem(storageKey,JSON.stringify({...state,categoryOverrides:{...state.categoryOverrides,[id]:{name,color}}}));
+  return state.tasks;
 }
 export function readTasks(storage) { return readState(storage).tasks; }
 function writeTasks(storage, state, tasks) {
@@ -71,11 +92,15 @@ function writeTasks(storage, state, tasks) {
 export function addCategory(storage, name, color) {
   const state = readState(storage);
   name = name.trim();
-  const names = [...categories,...(state.customCategories ?? []).map(c=>c.name)];
+  const list=categoryDefinitions(state), names=list.map(c=>c.name);
   if (!name || name.length > 40) throw new Error('Skriv et kategorinavn på 1–40 tegn.');
   if (names.some(n=>categoryKey(n)===categoryKey(name))) throw new Error('En kategori med dette navnet finnes allerede.');
   if (!/^#[0-9a-f]{6}$/i.test(color)) throw new Error('Velg en gyldig farge.');
-  storage.setItem(storageKey,JSON.stringify({...state,customCategories:[...(state.customCategories ?? []),{name,color}]}));
+  let id=name;
+  for(let suffix=2;list.some(c=>categoryKey(c.id)===categoryKey(id));suffix++) id=`${name.slice(0,30)}~${suffix}`;
+  const next={...state,customCategories:[...(state.customCategories ?? []),{name:id,color}]};
+  if(id!==name) next.categoryOverrides={...state.categoryOverrides,[id]:{name,color}};
+  storage.setItem(storageKey,JSON.stringify(next));
   return state.tasks;
 }
 export function addTask(storage, task) {

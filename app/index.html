@@ -19,6 +19,7 @@
         <label>Vis kategori <select id="category-filter"><option value="">Vis alle</option></select></label>
         <button id="clear-filter" type="button">Vis alle</button>
         <button id="category-toggle" type="button" aria-controls="category-panel" aria-expanded="false">+ Ny kategori</button>
+        <button id="manage-categories" type="button" aria-controls="manage-panel" aria-expanded="false">Administrer kategorier</button>
         <p id="filter-status" role="status"></p>
       </div>
       <section id="category-panel" class="completed-panel" hidden>
@@ -32,6 +33,7 @@
           <button id="category-cancel" type="button">Avbryt kategori</button>
         </form>
       </section>
+      <section id="manage-panel" class="completed-panel" aria-label="Administrer kategorier" hidden></section>
       <div class="tidy-toolbar"><button id="undated-toggle" aria-expanded="false" aria-controls="undated-panel">Uten dato</button><button id="tidy">Rydd side</button><button id="completed-toggle" aria-expanded="false" aria-controls="completed-panel">Fullført</button><p>Rydd side skjuler alle fullførte oppgaver, også i kategorier som er skjult av filteret. Du finner dem igjen under Fullført.</p></div>
       <p id="message" role="status" aria-live="polite"></p>
       <section id="completed-panel" class="completed-panel" aria-labelledby="completed-heading" hidden></section>

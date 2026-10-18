@@ -1,8 +1,35 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, readCategories, addCategory, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
+import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, readCategories, addCategory, editCategory, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
+
+test('rename/recolour preserves task records, stable default and reusable old names',()=>{
+  const storage=memory();addTask(storage,{...task,completed:true,archived:true});
+  const before=readTasks(storage), original=readCategories(storage).find(c=>c.id==='Ellers');
+  editCategory(storage,'Ellers','Privat','#112233',original);
+  assert.deepEqual(readTasks(storage),before);
+  assert.deepEqual(readCategories(storage).find(c=>c.id==='Ellers'),{id:'Ellers',name:'Privat',color:'#112233'});
+  assert.throws(()=>editCategory(storage,'Ellers','Outdated','#123456',original));
+  addCategory(storage,'Ellers','#ffffff');
+  const reused=readCategories(storage).find(c=>c.name==='Ellers');assert.notEqual(reused.id,'Ellers');
+  addTask(storage,{...task,id:'new',category:reused.id});
+  changeTask(storage,'one',{completed:false});archiveCompleted(storage);
+  assert.equal(readCategories(storage).find(c=>c.id==='Ellers').name,'Privat');
+  addCategory(storage,'__proto__','#000000');editCategory(storage,'__proto__','Safe','#123456');
+  assert.equal(readCategories(storage).find(c=>c.id==='__proto__').name,'Safe');
+});
+test('category edits reject invalid and duplicate names and preserve failures',()=>{
+  const storage=memory();addTask(storage,task);const before=storage.getItem(storageKey);
+  for(const name of ['',' ','JOBB','x'.repeat(41)]) assert.throws(()=>editCategory(storage,'Ellers',name,'#123456'));
+  assert.throws(()=>editCategory(storage,'Ellers','Other','red'));
+  assert.throws(()=>editCategory({getItem:storage.getItem,setItem:()=>{throw Error('quota');}},'Ellers','Other','#123456'));
+  assert.equal(storage.getItem(storageKey),before);
+  for(const categoryOverrides of [null,[],{Unknown:{name:'X',color:'#123456'}},{Ellers:{name:'Jobb',color:'#123456'}},{Ellers:{name:'X',color:'#123456',id:'Jobb'}}]) {
+    storage.setItem(storageKey,JSON.stringify({version:1,tasks:[task],categoryOverrides}));
+    assert.throws(()=>readTasks(storage));
+  }
+});
 
 test('custom categories retain legacy tasks and survive every task mutation', () => {
   const storage = memory(); addTask(storage,task);

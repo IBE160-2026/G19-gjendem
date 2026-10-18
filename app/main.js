@@ -1,4 +1,4 @@
-import {categories, readCategories, addCategory, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
+import {categories, readCategories, addCategory, editCategory, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
@@ -10,6 +10,8 @@ const visibleTasks = () => tasks.filter(t => !selectedCategory || t.category ===
 let blocked = false;
 let dirty = false;
 let categoryDirty = false;
+const categoryEdits = new Set();
+const categoryName = id => categoryList.find(c=>c.id===id)?.name ?? id;
 let saving = false;
 let editorSnapshot = null;
 let expandedDate = null;
@@ -104,8 +106,8 @@ function render() {
   drawCompleted();
   drawUndated();
 }
-function paintCategory(node, name) {
-  const color = categoryList.find(c=>c.name===name)?.color || '#557799';
+function paintCategory(node, id, previewColor) {
+  const color = previewColor || categoryList.find(c=>c.id===id)?.color || '#557799';
   node.style.setProperty('--stripe', color);
   const channels = [1,3,5].map(i=>Math.round(parseInt(color.slice(i,i+2),16)*0.12+255*0.88));
   node.style.backgroundColor = `rgb(${channels.join(',')})`;
@@ -113,19 +115,20 @@ function paintCategory(node, name) {
 function drawCategories() {
   const filter = document.querySelector('#category-filter');
   filter.replaceChildren(new Option('Vis alle',''));
-  for (const c of categoryList) filter.add(new Option(c.name,c.name));
-  if (!categoryList.some(c=>c.name===selectedCategory)) selectedCategory = '';
+  for (const c of categoryList) filter.add(new Option(c.name,c.id));
+  if (!categoryList.some(c=>c.id===selectedCategory)) selectedCategory = '';
   filter.value = selectedCategory; filter.disabled = blocked;
   document.querySelector('#clear-filter').disabled = blocked || !selectedCategory;
   document.querySelector('#category-toggle').disabled = blocked;
+  document.querySelector('#manage-categories').disabled = blocked;
   const legend = document.querySelector('.legend'); legend.replaceChildren();
   for (const c of categoryList) {
-    const marker = element('span',c.name,categories.includes(c.name) ? c.name.toLowerCase() : 'custom-category');
-    if (!categories.includes(c.name)) paintCategory(marker,c.name);
+    const marker = element('span',c.name,categories.includes(c.id) ? c.id.toLowerCase() : 'custom-category');
+    paintCategory(marker,c.id);
     legend.append(marker);
   }
   document.querySelector('#filter-status').textContent = selectedCategory
-    ? `Viser bare ${selectedCategory}. ${visibleTasks().length ? '' : 'Ingen oppgaver i denne kategorien. '}Konflikter sjekkes mot alle kategorier.`
+    ? `Viser bare ${categoryName(selectedCategory)}. ${visibleTasks().length ? '' : 'Ingen oppgaver i denne kategorien. '}Konflikter sjekkes mot alle kategorier.`
     : 'Viser alle kategorier.';
 }
 function setFilter(value) {
@@ -217,13 +220,13 @@ function drawUpcoming() {
 }
 function taskCard(task, surface) {
   const card = element('div', undefined, `task ${categories.includes(task.category) ? task.category.toLowerCase() : 'custom-category'}`);
-  if (!categories.includes(task.category)) paintCategory(card, task.category);
+  paintCategory(card, task.category);
   card.dataset.taskId = task.id; card.dataset.surface = surface;
   const check = element('input'); check.type = 'checkbox'; check.checked = Boolean(task.completed);
   check.setAttribute('aria-label', `Ferdig: ${task.title}`); check.disabled = blocked;
   const edit = element('button', undefined, 'task-edit'); edit.type = 'button'; edit.disabled = blocked;
   edit.setAttribute('aria-label', `Rediger ${task.title}`);
-  edit.append(element('span', task.title, 'task-title'), element('small', `${task.start ? `${task.start}–${task.end} · ` : ''}${task.category}`));
+  edit.append(element('span', task.title, 'task-title'), element('small', `${task.start ? `${task.start}–${task.end} · ` : ''}${categoryName(task.category)}`));
   if (surface.startsWith('sidebar-')) {
     edit.title = task.title;
     if (surface !== 'sidebar-today') edit.append(element('small', fullDate(task.date), 'task-date'));
@@ -371,7 +374,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
   const categoryLabel = element('label', 'Kategori');
   const category = element('select'); category.name = 'category';
   category.setAttribute('aria-label', 'Kategori');
-  for (const {name} of categoryList) { const option = element('option', name); option.value = name; category.append(option); }
+  for (const {id,name} of categoryList) { const option = element('option', name); option.value = id; category.append(option); }
   category.value = existing?.category ?? 'Ellers'; categoryLabel.append(category); fields.append(dateLabel, categoryLabel);
   const times = element('div', undefined, 'fields');
   const startField = timeField('Start (valgfritt)', 'start', existing?.start ?? startPrefill);
@@ -438,6 +441,67 @@ function navigate(delta) {
   if (target.getFullYear() < 1000 || target.getFullYear() > 9999) return;
   shown = target; dirty = false; expandedDate = null; load(); render();
 }
+function refreshEditorCategories() {
+  const select=document.querySelector('#editor select[name="category"]');
+  if (!select) return;
+  const current=select.value;
+  select.replaceChildren(...categoryList.map(c=>new Option(c.name,c.id))); select.value=current;
+}
+const manager=document.querySelector('#manage-panel');
+function closeManager() {
+  if(saving || (categoryEdits.size && !confirm('Forkaste kategoriene du ikke har lagret?'))) return;
+  categoryEdits.clear(); manager.hidden=true; manager.replaceChildren();
+  document.querySelector('#manage-categories').setAttribute('aria-expanded','false');
+  document.querySelector('#manage-categories').focus();
+}
+function drawManager() {
+  const drafts=new Map([...manager.querySelectorAll('.category-row')].filter(row=>categoryEdits.has(row.dataset.categoryId)).map(row=>[row.dataset.categoryId,row]));
+  manager.replaceChildren(element('h3','Administrer kategorier'),element('p','Endringer gjelder alle oppgaver, også fullførte. Forhåndsvisningen lagres først når du trykker Lagre.','day-help'));
+  const close=element('button','Lukk kategorier');close.type='button';close.addEventListener('click',closeManager);manager.append(close);
+  const presets=[['Blå','#4a7fc5'],['Gul','#b99a26'],['Grønn','#538759'],['Brun','#a27c55'],['Lilla','#8654ad'],['Rosa','#ba567a']];
+  for(const item of categoryList) {
+    if(drafts.has(item.id)){manager.append(drafts.get(item.id));continue;}
+    let snapshot=structuredClone(item);
+    const form=element('form',undefined,'category-row');form.dataset.categoryId=item.id;
+    const heading=element('h4',item.name);form.append(heading);
+    const nameLabel=element('label','Navn');const name=element('input');name.required=true;name.maxLength=40;name.value=item.name;nameLabel.append(name);
+    const colorLabel=element('label','Egen farge');const color=element('input');color.type='color';color.value=item.color;colorLabel.append(color);
+    const preview=element('div',undefined,'task category-preview');
+    preview.append(element('span','Eksempeloppgave','task-title'),element('small',item.name));
+    preview.setAttribute('aria-label','Forhåndsvisning');
+    const refresh=()=>{preview.querySelector('small').textContent=name.value.trim()||'Kategorinavn';paintCategory(preview,item.id,color.value);};
+    const mark=()=>{if(name.value!==snapshot.name||color.value.toLowerCase()!==snapshot.color.toLowerCase())categoryEdits.add(item.id);else categoryEdits.delete(item.id);refresh();};
+    form.addEventListener('input',mark);
+    const swatches=element('div',undefined,'category-swatches');
+    for(const [label,value] of presets) {
+      const button=element('button',label);button.type='button';button.style.borderBottom=`5px solid ${value}`;
+      button.addEventListener('click',()=>{color.value=value;mark();});swatches.append(button);
+    }
+    const error=element('p','','error');error.setAttribute('role','alert');
+    const save=element('button','Lagre kategori');save.type='submit';
+    const cancel=element('button','Avbryt');cancel.type='button';
+    cancel.addEventListener('click',()=>{
+      const latest=categoryList.find(c=>c.id===item.id);snapshot=structuredClone(latest);
+      name.value=latest.name;color.value=latest.color;heading.textContent=latest.name;error.textContent='';categoryEdits.delete(item.id);refresh();
+    });
+    form.append(nameLabel,colorLabel,swatches,preview,error,save,cancel);refresh();
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();error.textContent='';
+      try {
+        if(!await persist(()=>editCategory(localStorage,item.id,name.value,color.value,snapshot)))return;
+        snapshot=structuredClone(categoryList.find(c=>c.id===item.id));name.value=snapshot.name;heading.textContent=snapshot.name;categoryEdits.delete(item.id);
+        refreshEditorCategories();redrawPreservingEditor();refresh();announce(`Kategorien «${snapshot.name}» er oppdatert.`);save.focus();
+      } catch(failure) {error.textContent=/^(Kategorien er endret|Skriv |En kategori|Velg )/.test(failure.message)?failure.message:'Kategorien ble ikke lagret. Endringene dine er beholdt. Prøv igjen.';}
+    });
+    manager.append(form);
+  }
+}
+document.querySelector('#manage-categories').addEventListener('click',()=>{
+  if(saving)return;
+  if(!manager.hidden){closeManager();return;}
+  load();if(blocked)return;
+  drawManager();manager.hidden=false;document.querySelector('#manage-categories').setAttribute('aria-expanded','true');manager.querySelector('input')?.focus();
+});
 document.querySelector('#category-filter').addEventListener('change', event => setFilter(event.target.value));
 document.querySelector('#clear-filter').addEventListener('click', () => {setFilter(''); document.querySelector('#category-filter').focus();});
 const categoryPanel = document.querySelector('#category-panel');
@@ -469,9 +533,10 @@ document.querySelector('#category-form').addEventListener('submit',async event =
     categoryList = readCategories(localStorage);
     const select = document.querySelector('#editor select[name="category"]');
     if (select) {
-      const current = select.value; select.replaceChildren(...categoryList.map(c=>new Option(c.name,c.name))); select.value = current;
+      const current = select.value; select.replaceChildren(...categoryList.map(c=>new Option(c.name,c.id))); select.value = current;
     }
     redrawPreservingEditor();
+    if(!manager.hidden) drawManager();
     document.querySelector('#category-form').reset(); categoryDirty=false; closeCategoryPanel(); announce(`Kategorien «${name}» er lagret.`);
   } catch (failure) { error.textContent = failure.message.startsWith('Skriv ') || failure.message.startsWith('En kategori') || failure.message.startsWith('Velg ') ? failure.message : 'Kategorien ble ikke lagret. Opplysningene er beholdt. Prøv igjen.'; }
 });
@@ -497,7 +562,7 @@ document.querySelector('#tidy').addEventListener('click', async () => {
     document.querySelector('#completed-toggle').focus();
   } catch (error) { announce(writeError(error),true); document.querySelector('#tidy').focus(); }
 });
-window.addEventListener('beforeunload', event => { if (dirty || categoryDirty) { event.preventDefault(); event.returnValue = ''; } });
+window.addEventListener('beforeunload', event => { if (dirty || categoryDirty || categoryEdits.size) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('storage', event => {
   if (event.key !== storageKey && event.key !== null) return;
   if (saving || document.querySelector('#editor')) { announce('Oppgavene er endret i en annen fane. Oversikten oppdateres når du lagrer eller laster siden på nytt.'); return; }
