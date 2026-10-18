@@ -11,7 +11,7 @@ try {
   await page.goto('http://localhost:5173');
   assert.equal(await page.locator('[aria-current="date"]').count(), 1);
   await page.locator('.day:not(.empty) .add').first().click();
-  assert.equal(await page.locator('select').inputValue(), 'Ellers');
+  assert.equal(await page.getByLabel('Kategori',{exact:true}).inputValue(), 'Ellers');
   await page.getByLabel('Hva skal du gjøre?').fill('Skrive rapport');
   await page.getByLabel('Kategori', {exact:true}).selectOption('Jobb');
   await page.getByRole('button', {name:'Lagre oppgave'}).click();

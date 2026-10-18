@@ -1,11 +1,15 @@
-import {categories, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
+import {categories, readCategories, addCategory, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
 let shown = new Date();
 let tasks = [];
+let categoryList = [];
+let selectedCategory = '';
+const visibleTasks = () => tasks.filter(t => !selectedCategory || t.category === selectedCategory);
 let blocked = false;
 let dirty = false;
+let categoryDirty = false;
 let saving = false;
 let editorSnapshot = null;
 let expandedDate = null;
@@ -26,7 +30,7 @@ function announce(text, error = false) {
   message.classList.toggle('error', error);
 }
 function load() {
-  try { tasks = readTasks(localStorage); blocked = false; }
+  try { tasks = readTasks(localStorage); categoryList = readCategories(localStorage); blocked = false; }
   catch { blocked = true; announce('Vi kunne ikke lese de lagrede oppgavene. Ingen data er overskrevet. Prøv å laste siden på nytt eller sjekk nettleserens lagringsinnstillinger.', true); }
 }
 function canLeave() {
@@ -39,7 +43,7 @@ async function persist(operation) {
   const controls = [...document.querySelectorAll('button, input, select, textarea')].map(node => [node, node.disabled]);
   controls.forEach(([node]) => { node.disabled = true; });
   try {
-    const write = () => { tasks = operation(); };
+    const write = () => { tasks = operation(); categoryList = readCategories(localStorage); };
     if (navigator.locks) await navigator.locks.request('smart-todo-save', write); else write();
     return true;
   } finally {
@@ -56,6 +60,7 @@ function render() {
   editorSnapshot = null;
   document.querySelector('#loose-editor').replaceChildren();
   conflicts = conflictingIds(tasks);
+  drawCategories();
   const year = shown.getFullYear(), month = shown.getMonth();
   document.querySelector('#month').textContent = new Intl.DateTimeFormat('nb-NO', {month: 'long', year: 'numeric'}).format(shown);
   calendar.replaceChildren();
@@ -89,7 +94,7 @@ function render() {
       plus.disabled = blocked;
       plus.addEventListener('click', () => openEditor(date, row));
       heading.append(plus); cell.append(heading);
-      for (const task of tasks.filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
+      for (const task of visibleTasks().filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
       row.append(cell);
     }
     calendar.append(row);
@@ -99,9 +104,37 @@ function render() {
   drawCompleted();
   drawUndated();
 }
+function paintCategory(node, name) {
+  const color = categoryList.find(c=>c.name===name)?.color || '#557799';
+  node.style.setProperty('--stripe', color);
+  const channels = [1,3,5].map(i=>Math.round(parseInt(color.slice(i,i+2),16)*0.12+255*0.88));
+  node.style.backgroundColor = `rgb(${channels.join(',')})`;
+}
+function drawCategories() {
+  const filter = document.querySelector('#category-filter');
+  filter.replaceChildren(new Option('Vis alle',''));
+  for (const c of categoryList) filter.add(new Option(c.name,c.name));
+  if (!categoryList.some(c=>c.name===selectedCategory)) selectedCategory = '';
+  filter.value = selectedCategory; filter.disabled = blocked;
+  document.querySelector('#clear-filter').disabled = blocked || !selectedCategory;
+  document.querySelector('#category-toggle').disabled = blocked;
+  const legend = document.querySelector('.legend'); legend.replaceChildren();
+  for (const c of categoryList) {
+    const marker = element('span',c.name,categories.includes(c.name) ? c.name.toLowerCase() : 'custom-category');
+    if (!categories.includes(c.name)) paintCategory(marker,c.name);
+    legend.append(marker);
+  }
+  document.querySelector('#filter-status').textContent = selectedCategory
+    ? `Viser bare ${selectedCategory}. ${visibleTasks().length ? '' : 'Ingen oppgaver i denne kategorien. '}Konflikter sjekkes mot alle kategorier.`
+    : 'Viser alle kategorier.';
+}
+function setFilter(value) {
+  if (saving) return;
+  selectedCategory = value; redrawPreservingEditor();
+}
 function drawUndated() {
   const panel = document.querySelector('#undated-panel');
-  const items = tasks.filter(t => !t.date && !t.archived).sort(byTime);
+  const items = visibleTasks().filter(t => !t.date && !t.archived).sort(byTime);
   const toggle = document.querySelector('#undated-toggle');
   toggle.textContent = `Uten dato (${items.length})`;
   toggle.setAttribute('aria-expanded', String(undatedOpen));
@@ -118,7 +151,7 @@ function drawUndated() {
 function drawCompleted() {
   const panel = document.querySelector('#completed-panel');
   panel.hidden = !completedOpen;
-  const items = tasks.filter(t => t.completed).sort((a,b) => b.date.localeCompare(a.date) || byTime(a,b));
+  const items = visibleTasks().filter(t => t.completed).sort((a,b) => b.date.localeCompare(a.date) || byTime(a,b));
   const toggle = document.querySelector('#completed-toggle');
   toggle.textContent = `Fullført (${items.length})`; toggle.setAttribute('aria-expanded', String(completedOpen));
   document.querySelector('#tidy').disabled = blocked || !tasks.some(t => t.completed && !t.archived);
@@ -148,7 +181,7 @@ function drawUpcoming() {
   sidebarDate = dateKey(new Date());
   sidebar.replaceChildren(element('h2', 'Min oversikt'));
   if (blocked) { sidebar.append(element('p', 'Oppgavene kunne ikke leses. Se meldingen ved kalenderen.', 'error')); return; }
-  const groups = upcomingGroups(tasks);
+  const groups = upcomingGroups(visibleTasks());
   for (const [key, label, description] of [
     ['today', 'I dag', 'Det du har på planen i dag'],
     ['week', 'Denne uken', 'Resten av uken etter i dag'],
@@ -183,7 +216,8 @@ function drawUpcoming() {
   }
 }
 function taskCard(task, surface) {
-  const card = element('div', undefined, `task ${task.category.toLowerCase()}`);
+  const card = element('div', undefined, `task ${categories.includes(task.category) ? task.category.toLowerCase() : 'custom-category'}`);
+  if (!categories.includes(task.category)) paintCategory(card, task.category);
   card.dataset.taskId = task.id; card.dataset.surface = surface;
   const check = element('input'); check.type = 'checkbox'; check.checked = Boolean(task.completed);
   check.setAttribute('aria-label', `Ferdig: ${task.title}`); check.disabled = blocked;
@@ -235,7 +269,7 @@ function drawDay() {
   const timetable = element('section'); timetable.append(element('h4', 'Timeplan'));
   timetable.append(element('p', 'Trykk på et klokkeslett for å legge til. Du velger sluttiden selv.', 'day-help'));
   const timeline = element('div', undefined, 'timeline'); timeline.tabIndex = 0; timeline.setAttribute('aria-label', 'Timeplan for hele dagen');
-  const dated = tasks.filter(t => t.date === expandedDate && !t.archived).sort(byTime);
+  const dated = visibleTasks().filter(t => t.date === expandedDate && !t.archived).sort(byTime);
   for (let hour = 0; hour < 24; hour++) {
     const time = `${String(hour).padStart(2, '0')}:00`;
     const slot = element('div', undefined, 'time-slot'); slot.dataset.hour = String(hour);
@@ -337,7 +371,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
   const categoryLabel = element('label', 'Kategori');
   const category = element('select'); category.name = 'category';
   category.setAttribute('aria-label', 'Kategori');
-  for (const name of categories) { const option = element('option', name); option.value = name; category.append(option); }
+  for (const {name} of categoryList) { const option = element('option', name); option.value = name; category.append(option); }
   category.value = existing?.category ?? 'Ellers'; categoryLabel.append(category); fields.append(dateLabel, categoryLabel);
   const times = element('div', undefined, 'fields');
   const startField = timeField('Start (valgfritt)', 'start', existing?.start ?? startPrefill);
@@ -392,6 +426,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
         : addTask(localStorage, task))) return;
       if (task.date) shown = new Date(`${task.date}T12:00:00`); else undatedOpen = true;
       dirty = false; expandedDate = null;
+      if (selectedCategory && task.category !== selectedCategory) selectedCategory = task.category;
       render(); announce(`«${name}» er lagret.`);
       document.querySelector(task.date ? '#today' : '#undated-toggle').focus();
     } catch (failure) { error.textContent = writeError(failure); }
@@ -403,6 +438,43 @@ function navigate(delta) {
   if (target.getFullYear() < 1000 || target.getFullYear() > 9999) return;
   shown = target; dirty = false; expandedDate = null; load(); render();
 }
+document.querySelector('#category-filter').addEventListener('change', event => setFilter(event.target.value));
+document.querySelector('#clear-filter').addEventListener('click', () => {setFilter(''); document.querySelector('#category-filter').focus();});
+const categoryPanel = document.querySelector('#category-panel');
+document.querySelector('#category-form').addEventListener('input',()=>{categoryDirty=true;});
+function closeCategoryPanel() {
+  if (saving) return;
+  categoryPanel.hidden = true;
+  document.querySelector('#category-toggle').setAttribute('aria-expanded','false');
+  document.querySelector('#category-toggle').focus();
+}
+document.querySelector('#category-toggle').addEventListener('click', () => {
+  if (saving) return;
+  categoryPanel.hidden = !categoryPanel.hidden;
+  document.querySelector('#category-toggle').setAttribute('aria-expanded',String(!categoryPanel.hidden));
+  if (!categoryPanel.hidden) document.querySelector('#category-name').focus();
+});
+document.querySelector('#category-cancel').addEventListener('click',()=>{
+  if (saving) return;
+  document.querySelector('#category-form').reset();
+  document.querySelector('#category-error').textContent='';
+  categoryDirty=false; closeCategoryPanel();
+});
+document.querySelector('#category-form').addEventListener('submit',async event => {
+  event.preventDefault();
+  const error = document.querySelector('#category-error'); error.textContent = '';
+  const name = document.querySelector('#category-name').value.trim();
+  try {
+    if (!await persist(()=>addCategory(localStorage,name,document.querySelector('#category-color').value))) return;
+    categoryList = readCategories(localStorage);
+    const select = document.querySelector('#editor select[name="category"]');
+    if (select) {
+      const current = select.value; select.replaceChildren(...categoryList.map(c=>new Option(c.name,c.name))); select.value = current;
+    }
+    redrawPreservingEditor();
+    document.querySelector('#category-form').reset(); categoryDirty=false; closeCategoryPanel(); announce(`Kategorien «${name}» er lagret.`);
+  } catch (failure) { error.textContent = failure.message.startsWith('Skriv ') || failure.message.startsWith('En kategori') || failure.message.startsWith('Velg ') ? failure.message : 'Kategorien ble ikke lagret. Opplysningene er beholdt. Prøv igjen.'; }
+});
 document.querySelector('#previous').addEventListener('click', () => navigate(-1));
 document.querySelector('#next').addEventListener('click', () => navigate(1));
 document.querySelector('#today').addEventListener('click', () => navigate(null));
@@ -425,7 +497,7 @@ document.querySelector('#tidy').addEventListener('click', async () => {
     document.querySelector('#completed-toggle').focus();
   } catch (error) { announce(writeError(error),true); document.querySelector('#tidy').focus(); }
 });
-window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
+window.addEventListener('beforeunload', event => { if (dirty || categoryDirty) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('storage', event => {
   if (event.key !== storageKey && event.key !== null) return;
   if (saving || document.querySelector('#editor')) { announce('Oppgavene er endret i en annen fane. Oversikten oppdateres når du lagrer eller laster siden på nytt.'); return; }

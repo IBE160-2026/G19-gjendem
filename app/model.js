@@ -40,30 +40,49 @@ export function validDate(value) {
   const date = new Date(y, m - 1, d);
   return y >= 1000 && y <= 9999 && dateKey(date) === value;
 }
-export function validateTask(task) {
+export function validateTask(task, names = categories) {
   return typeof task.id === 'string' && task.id.length > 0 &&
     typeof task.title === 'string' && task.title.trim().length > 0 && task.title.length <= 200 &&
-    (validDate(task.date) || task.date === '') && (task.date !== '' || (!task.start && !task.end)) && categories.includes(task.category) &&
+    (validDate(task.date) || task.date === '') && (task.date !== '' || (!task.start && !task.end)) && names.includes(task.category) &&
     (task.description === undefined || typeof task.description === 'string') &&
     (task.archived === undefined || typeof task.archived === 'boolean') && (!task.archived || task.completed === true) &&
     (task.completed === undefined || typeof task.completed === 'boolean') && validTimes(task.start, task.end);
 }
-export function readTasks(storage) {
+const defaultColors = ['#4a7fc5', '#b99a26', '#538759', '#a27c55'];
+const categoryKey = name => name.normalize('NFKC').toLocaleLowerCase('nb-NO');
+export function readState(storage) {
   const raw = storage.getItem(storageKey);
-  if (raw === null) return [];
-  const data = JSON.parse(raw);
-  if (data.version !== 1 || !Array.isArray(data.tasks) || !data.tasks.every(t => t && validateTask(t)) ||
-      new Set(data.tasks.map(t => t.id)).size !== data.tasks.length) throw new Error('Invalid saved data');
-  return data.tasks;
+  const data = raw === null ? {version:1, tasks:[]} : JSON.parse(raw);
+  if (!data || data.version !== 1 || !Array.isArray(data.tasks)) throw new Error('Invalid saved data');
+  const custom = data.customCategories === undefined ? [] : data.customCategories;
+  if (!Array.isArray(custom) || !custom.every(c => c && typeof c.name === 'string' && c.name === c.name.trim() && c.name.length > 0 && c.name.length <= 40 && /^#[0-9a-f]{6}$/i.test(c.color))) throw new Error('Invalid categories');
+  const names = [...categories, ...custom.map(c => c.name)];
+  if (new Set(names.map(categoryKey)).size !== names.length || !data.tasks.every(t => t && validateTask(t, names)) || new Set(data.tasks.map(t=>t.id)).size !== data.tasks.length) throw new Error('Invalid saved data');
+  return data;
+}
+export function readCategories(storage) {
+  return [...categories.map((name,i)=>({name,color:defaultColors[i]})), ...(readState(storage).customCategories ?? [])];
+}
+export function readTasks(storage) { return readState(storage).tasks; }
+function writeTasks(storage, state, tasks) {
+  storage.setItem(storageKey, JSON.stringify({...state,tasks}));
+  return tasks;
+}
+export function addCategory(storage, name, color) {
+  const state = readState(storage);
+  name = name.trim();
+  const names = [...categories,...(state.customCategories ?? []).map(c=>c.name)];
+  if (!name || name.length > 40) throw new Error('Skriv et kategorinavn på 1–40 tegn.');
+  if (names.some(n=>categoryKey(n)===categoryKey(name))) throw new Error('En kategori med dette navnet finnes allerede.');
+  if (!/^#[0-9a-f]{6}$/i.test(color)) throw new Error('Velg en gyldig farge.');
+  storage.setItem(storageKey,JSON.stringify({...state,customCategories:[...(state.customCategories ?? []),{name,color}]}));
+  return state.tasks;
 }
 export function addTask(storage, task) {
-  if (!validateTask(task)) throw new Error('Invalid task');
-  // Re-read before writing so another tab's saved tasks are not replaced by a stale view.
-  const tasks = readTasks(storage);
-  if (tasks.some(t => t.id === task.id)) throw new Error('Duplicate task');
-  const next = [...tasks, task];
-  storage.setItem(storageKey, JSON.stringify({version: 1, tasks: next}));
-  return next;
+  const state = readState(storage);
+  if (!validateTask(task,[...categories,...(state.customCategories ?? []).map(c=>c.name)])) throw new Error('Invalid task');
+  if (state.tasks.some(t => t.id === task.id)) throw new Error('Duplicate task');
+  return writeTasks(storage,state,[...state.tasks,task]);
 }
 export function monthDays(year, month) {
   const start = new Date(year, month, 1);
@@ -74,7 +93,7 @@ export function monthDays(year, month) {
 }
 
 export function changeTask(storage, id, change, expected) {
-  const tasks = readTasks(storage);
+  const state = readState(storage), tasks = state.tasks;
   const index = tasks.findIndex(task => task.id === id);
   if (index === -1 || (expected && JSON.stringify(tasks[index]) !== JSON.stringify(expected))) {
     const error = new Error('Task changed in another tab'); error.code = 'conflict'; throw error;
@@ -84,16 +103,14 @@ export function changeTask(storage, id, change, expected) {
   else {
     const updated = {...tasks[index], ...change, id};
     if (change.completed === false && updated.archived) updated.archived = false;
-    if (!validateTask(updated)) throw new Error('Invalid task');
+    if (!validateTask(updated,[...categories,...(state.customCategories ?? []).map(c=>c.name)])) throw new Error('Invalid task');
     next[index] = updated;
   }
-  storage.setItem(storageKey, JSON.stringify({version: 1, tasks: next}));
-  return next;
+  return writeTasks(storage,state,next);
 }
 
 export function archiveCompleted(storage) {
-  const tasks = readTasks(storage);
+  const state = readState(storage), tasks = state.tasks;
   const next = tasks.map(task => task.completed && !task.archived ? {...task, archived:true} : task);
-  storage.setItem(storageKey, JSON.stringify({version:1,tasks:next}));
-  return next;
+  return writeTasks(storage,state,next);
 }

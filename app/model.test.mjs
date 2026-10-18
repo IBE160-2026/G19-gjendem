@@ -1,8 +1,43 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
+import {validDate, validTimes, conflictingIds, byTime, upcomingGroups, monthDays, readTasks, readCategories, addCategory, addTask, changeTask, archiveCompleted, storageKey} from './model.js';
 const memory = () => { const data = new Map(); return {getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value)}; };
 const task = {id:'one', title:'Levere rapport', date:'2026-09-27', category:'Ellers'};
+
+test('custom categories retain legacy tasks and survive every task mutation', () => {
+  const storage = memory(); addTask(storage,task);
+  const before = storage.getItem(storageKey); readCategories(storage);
+  assert.equal(storage.getItem(storageKey),before);
+  addCategory(storage,'  Trening  ','#123456');
+  assert.deepEqual(readTasks(storage),[task]);
+  const categoriesBefore = readCategories(storage);
+  addTask(storage,{...task,id:'custom',category:'Trening',description:'Behold'});
+  changeTask(storage,'custom',{completed:true}); archiveCompleted(storage);
+  changeTask(storage,'custom',{completed:false}); changeTask(storage,'one',null);
+  assert.deepEqual(readCategories(storage),categoriesBefore);
+  assert.equal(readTasks(storage)[0].category,'Trening');
+  assert.equal(readTasks(storage)[0].description,'Behold');
+  addCategory(storage,'Hobby','#ffffff');
+  changeTask(storage,'custom',{title:'Changed by an older tab'});
+  assert.equal(readCategories(storage).length,6);
+});
+test('category validation and failed writes preserve saved data', () => {
+  const storage = memory(); addTask(storage,task); addCategory(storage,'Trening','#000000');
+  const before=storage.getItem(storageKey);
+  for(const name of ['','   ','JOBB','trening','Ｔｒｅｎｉｎｇ','x'.repeat(41)]) assert.throws(()=>addCategory(storage,name,'#123456'));
+  assert.throws(()=>addCategory(storage,'Hobby','red'));
+  assert.throws(()=>addTask(storage,{...task,id:'bad',category:'Unknown'}));
+  assert.equal(storage.getItem(storageKey),before);
+  const failing={getItem:storage.getItem,setItem:()=>{throw Error('quota');}};
+  assert.throws(()=>addCategory(failing,'Hobby','#123456'));
+  assert.equal(storage.getItem(storageKey),before);
+  for(const customCategories of [null,{},[{name:'Jobb',color:'#123456'}],[{name:'X',color:'red'}]]) {
+    storage.setItem(storageKey,JSON.stringify({version:1,tasks:[task],customCategories}));
+    const invalid=storage.getItem(storageKey);
+    assert.throws(()=>readTasks(storage)); assert.throws(()=>addCategory(storage,'Y','#123456'));
+    assert.equal(storage.getItem(storageKey),invalid);
+  }
+});
 
 test('undated tasks persist, can be scheduled, archived and restored without data loss', () => {
   const storage = memory();
