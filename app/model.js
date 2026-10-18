@@ -1,5 +1,25 @@
 export const categories = ['Jobb', 'Skole', 'Familie', 'Ellers'];
 export const storageKey = 'smart-todo.v1';
+export const holidayMinYear=1900, holidayMaxYear=2099;
+export function norwegianHolidays(year) {
+  const result=new Map();
+  if(!Number.isInteger(year)||year<holidayMinYear||year>holidayMaxYear)return result;
+  // Gregorian Easter: Oudin algorithm published by the US Naval Observatory.
+  // https://aa.usno.navy.mil/faq/easter — all divisions use integer truncation.
+  const div=(a,b)=>Math.trunc(a/b),c=div(year,100),n=year-19*div(year,19),k=div(c-17,25);
+  let i=c-div(c,4)-div(c-k,3)+19*n+15;
+  i-=30*div(i,30);
+  i-=div(i,28)*(1-div(i,28)*div(29,i+1)*div(21-n,11));
+  let j=year+div(year,4)+i+2-c+div(c,4);j-=7*div(j,7);
+  const l=i-j,month=3+div(l+40,44),day=l+28-31*div(month,4);
+  const add=(date,name)=>result.set(date,[...(result.get(date)||[]),name]);
+  for(const [date,name] of [['01-01','Første nyttårsdag'],['05-01','Arbeidernes dag'],['05-17','Grunnlovsdagen'],['12-25','Første juledag'],['12-26','Andre juledag']])add(`${year}-${date}`,name);
+  for(const [offset,name] of [[-3,'Skjærtorsdag'],[-2,'Langfredag'],[0,'Første påskedag'],[1,'Andre påskedag'],[39,'Kristi himmelfartsdag'],[49,'Første pinsedag'],[50,'Andre pinsedag']]) {
+    const date=new Date(Date.UTC(year,month-1,day+offset));
+    add(`${year}-${String(date.getUTCMonth()+1).padStart(2,'0')}-${String(date.getUTCDate()).padStart(2,'0')}`,name);
+  }
+  return result;
+}
 export function validTimes(start, end) {
   if ((start === undefined || start === '') && (end === undefined || end === '')) return true;
   return typeof start === 'string' && typeof end === 'string' &&

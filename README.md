@@ -27,6 +27,7 @@ No package installation, account or API key is needed to run the current app. If
 - **Administrer kategorier** edits names and colours with presets, custom colour and a preview. Save applies to all linked tasks, including completed tasks; Cancel discards the row's draft. Renamed Ellers remains the default.
 - **Tilpass utseende** previews background, calendar and day colours or a local background photo. Save retains choices, Cancel restores saved appearance, and Reset previews the defaults without changing tasks/categories.
 - **Bilde bak hele rutenettet** adds one continuous photo behind all day cells, independently of the surrounding photo. Date labels and task cards stay readable. Remove the calendar photo to reveal the chosen day colour.
+- Named Norwegian holidays show a red date, holiday names and a small red flag at the bottom-right. The current annual rules are calculated for 1900–2099; task entry is unchanged and coinciding holidays show both names.
 - Optional start/end times on the same date. Time choices use five-minute steps; the timetable opens at noon. Overlapping unfinished tasks show red text and an overlap label. Tasks that end exactly when another starts do not conflict.
 - Left sidebar for today, the rest of the week and next week onwards, with two tasks per section and inline expansion.
 - **Uten dato** for tasks to schedule later, **Rydd side** to hide completed tasks without deleting them, and **Fullført** to view or reopen completed tasks.
@@ -34,7 +35,7 @@ No package installation, account or API key is needed to run the current app. If
 
 ## Planned work
 
-Stage 1 still needs a separate overview of past unfinished tasks and Norwegian public holidays. Categories and appearance customisation are available. Past dated tasks can currently be found by navigating to their calendar month.
+Stage 1 still needs a separate overview of past unfinished tasks and the planned acceptance/user trials. Categories, appearance customisation and named Norwegian holidays are available. Past dated tasks can currently be found by navigating to their calendar month.
 
 Stage 2 will add AI category suggestions that the user accepts, rejects or changes. **AI is not implemented yet.** Before that stage, we will create epics and stories, select a service, document costs and what data is sent, and keep the API key on the server in an uncommitted `.env` file. No provider or model has been selected. The current app does not read `.env` or call an AI service.
 
@@ -47,6 +48,7 @@ From the repository root, run the model tests; these need only Node.js:
 ```powershell
 node --test app/model.test.mjs
 node --test app/appearance.test.mjs
+node --test app/holidays.test.mjs
 ```
 
 They cover date and time validation, overlap rules, weekly grouping, persistence, stale changes, descriptions, undated tasks and recoverable cleanup.
@@ -69,6 +71,7 @@ node app/categories-check.mjs
 node app/category-edit-check.mjs
 node app/appearance-check.mjs
 node app/grid-image-check.mjs
+node app/holidays-check.mjs
 ```
 
 These suites cover task editing, completion and deletion; timetables and conflicts; week boundaries and sidebar expansion; time selection; descriptions; cleanup/restoration; and undated task scheduling. They use isolated browser contexts, not the user's saved tasks. Generated screenshots are local test artifacts.

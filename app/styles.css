@@ -47,3 +47,9 @@
 .has-grid-image .day-number{background:#fff;color:#25313d;border-radius:4px}
 .has-grid-image .day-number[aria-expanded=true]{background:#e0edff;color:#244f83}
 .has-grid-image .day{border-color:rgba(255,255,255,.8)}
+.day.holiday{position:relative;padding-bottom:32px}
+.day.holiday .day-number{color:#ac1825;background:#fff;border-radius:4px}
+.holiday-name{display:table;max-width:100%;font-size:11px;line-height:1.4;font-weight:600;color:#ac1825;background:#fff;border-radius:4px;padding:3px 5px;margin:0 0 8px;overflow-wrap:anywhere}
+.holiday-flag{position:absolute;right:7px;bottom:6px;width:23px;height:23px;border-radius:4px;background:#fff;pointer-events:none}
+.holiday-flag::before{content:'';position:absolute;left:6px;top:4px;width:2px;height:16px;background:#ac1825}
+.holiday-flag::after{content:'';position:absolute;left:8px;top:4px;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:11px solid #ac1825}

@@ -1,4 +1,5 @@
 import {categories, readCategories, addCategory, editCategory, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
+import {norwegianHolidays, holidayMinYear, holidayMaxYear} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
@@ -66,6 +67,10 @@ function render() {
   conflicts = conflictingIds(tasks);
   drawCategories();
   const year = shown.getFullYear(), month = shown.getMonth();
+  const holidays=norwegianHolidays(year);
+  document.querySelector('#holiday-note').textContent=year<holidayMinYear||year>holidayMaxYear
+    ? `Helligdager vises bare for ${holidayMinYear}–${holidayMaxYear}. Du kan fortsatt bruke kalenderen.`
+    : 'Rødt flagg markerer navngitte hellig- og høytidsdager.';
   document.querySelector('#month').textContent = new Intl.DateTimeFormat('nb-NO', {month: 'long', year: 'numeric'}).format(shown);
   calendar.replaceChildren();
   const week = element('div', undefined, 'weekdays');
@@ -99,6 +104,15 @@ function render() {
       plus.disabled = blocked;
       plus.addEventListener('click', () => openEditor(date, row));
       heading.append(plus); cell.append(heading);
+      const holidayNames=holidays.get(date);
+      if(holidayNames) {
+        cell.classList.add('holiday');
+        const names=holidayNames.join(' · ');
+        cell.setAttribute('aria-label',`${fullDate(date)} – ${names}`);
+        label.setAttribute('aria-label',`Vis dagen ${fullDate(date)} – ${names}`);
+        cell.append(element('p',names,'holiday-name'));
+        const flag=element('span',undefined,'holiday-flag');flag.setAttribute('aria-hidden','true');cell.append(flag);
+      }
       for (const task of visibleTasks().filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
       row.append(cell);
     }
@@ -270,6 +284,8 @@ function drawDay() {
     calendar.querySelector(`[data-date="${date}"] .day-number`)?.focus();
   });
   header.append(heading, close); panel.append(header);
+  const holidayNames=norwegianHolidays(Number(expandedDate.slice(0,4))).get(expandedDate);
+  if(holidayNames)panel.append(element('p',holidayNames.join(' · '),'holiday-name'));
   const editorHost = element('div'); editorHost.id = 'day-editor'; panel.append(editorHost);
   const layout = element('div', undefined, 'day-layout');
   const timetable = element('section'); timetable.append(element('h4', 'Timeplan'));
