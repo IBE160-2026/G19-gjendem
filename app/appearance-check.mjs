@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,channel:'msedge'});
+try{
+ const context=await browser.newContext({viewport:{width:1500,height:1100}}),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('http://localhost:5173');
+ const date=await page.locator('[aria-current=date]').getAttribute('data-date');
+ const data={version:1,tasks:[{id:'x',title:'Testoppgave',category:'Jobb',date,start:'12:00',end:'13:00'},{id:'y',title:'Overlapper',category:'Skole',date,start:'12:30',end:'13:30'}]};
+ await page.evaluate(data=>localStorage.setItem('smart-todo.v1',JSON.stringify(data)),data);await page.reload();
+ const stored=await page.evaluate(()=>localStorage.getItem('smart-todo.v1'));
+ const open=()=>page.locator('#appearance-toggle').click();const save=async()=>{await page.locator('#appearance-save').click();await page.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();};
+ await page.locator(`[data-date="${date}"] .add`).click();await page.getByLabel('Hva skal du gjøre?',{exact:true}).fill('Behold utkast');
+ await open();await page.locator('#appearance-days').fill('#000000');await page.locator('#appearance-calendar').fill('#000000');
+ assert.equal(await page.locator('.day-number').first().evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),null);
+ await page.locator('#appearance-cancel').click();assert.equal(await page.getByLabel('Hva skal du gjøre?',{exact:true}).inputValue(),'Behold utkast');
+ page.once('dialog',d=>d.accept());await page.locator('#editor').getByRole('button',{name:'Avbryt',exact:true}).click();
+ await open();await page.locator('[data-theme=ocean]').click();await save();
+ const saved=await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1'));await page.reload();
+ assert.equal(await page.locator('.calendar-card').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(241, 247, 252)');
+ await open();await page.locator('#appearance-reset').click();await page.locator('#appearance-cancel').click();assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),saved);
+ await open();await page.locator('#appearance-days').fill('#000000');
+ await page.evaluate(()=>{window.realWrite=Storage.prototype.setItem;Storage.prototype.setItem=()=>{throw Error('quota');};});await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'ikke lagret'}).waitFor();
+ assert.equal(await page.locator('#appearance-days').inputValue(),'#000000');await page.evaluate(()=>Storage.prototype.setItem=window.realWrite);
+ // Generate a local fixture using browser canvas; no remote images or personal files.
+ const fixture=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=2400;c.height=1200;const x=c.getContext('2d');x.fillStyle='#354e89';x.fillRect(0,0,c.width,c.height);return c.toDataURL('image/png').split(',')[1];});
+ await page.locator('#appearance-image').setInputFiles({name:'test.png',mimeType:'image/png',buffer:Buffer.from(fixture,'base64')});
+ await page.locator('#appearance-image-state').filter({hasText:'valgt'}).waitFor();await save();
+ assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundSize),'cover');
+ await page.reload();assert.match(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
+ await open();await page.locator('#appearance-image').setInputFiles({name:'invalid.png',mimeType:'image/png',buffer:Buffer.from('not image')});await page.locator('#appearance-error').filter({hasText:'Kunne ikke lese'}).waitFor();
+ assert.match(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
+ const other=await context.newPage();await other.goto('http://localhost:5173');await other.locator('#appearance-toggle').click();await other.locator('[data-theme=warm]').click();await other.locator('#appearance-save').click();await other.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();
+ await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'annen fane'}).waitFor();await page.locator('#appearance-cancel').click();
+ await open();await page.locator('#appearance-reset').click();await save();await page.reload();assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.v1')),stored);
+ // A late image decode must not undo Cancel.
+ await open();await page.evaluate(()=>{window.realBitmap=window.createImageBitmap;window.createImageBitmap=(...args)=>new Promise((resolve,reject)=>{window.finishBitmap=()=>window.realBitmap(...args).then(resolve,reject);});});
+ await page.locator('#appearance-image').setInputFiles({name:'late.png',mimeType:'image/png',buffer:Buffer.from(fixture,'base64')});await page.locator('#appearance-cancel').click();await page.evaluate(()=>window.finishBitmap());
+ assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+ await open();await page.locator('#appearance-calendar').fill('#121212');await page.locator('#appearance-days').fill('#000000');await save();
+ await page.locator('#appearance-cancel').click();await page.screenshot({path:'app/test-results/appearance.png',fullPage:true});
+ assert.equal(await page.locator('.week .conflict').count(),2);
+ // Independent storage locks must never leave either feature's controls disabled.
+ await open();await page.locator('#appearance-calendar').fill('#ac1825');await page.locator('#appearance-days').fill('#386db1');
+ await page.evaluate(()=>{window.realLock=navigator.locks.request.bind(navigator.locks);window.pending={};navigator.locks.request=(name,fn)=>new Promise((resolve,reject)=>{window.pending[name]=()=>Promise.resolve().then(fn).then(resolve,reject);});});
+ await page.locator('#appearance-save').click();await page.waitForFunction(()=>!!window.pending['smart-todo-appearance']);
+ await page.locator('.week [data-task-id=x] input').click();await page.waitForFunction(()=>!!window.pending['smart-todo-save']);
+ await page.evaluate(()=>window.pending['smart-todo-appearance']());await page.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();
+ await page.evaluate(()=>window.pending['smart-todo-save']());await page.waitForFunction(()=>document.querySelector('.week [data-task-id=x]').classList.contains('completed'));
+ assert.equal(await page.locator('#appearance-background').isEnabled(),true);assert.equal(await page.locator('#appearance-cancel').isEnabled(),true);
+ await page.evaluate(()=>navigator.locks.request=window.realLock);
+ await page.locator('#appearance-cancel').click();
+ await page.evaluate(()=>{Storage.prototype.setItem=()=>{throw Error('quota');};});await page.locator('.week [data-task-id=x] input').click();await page.locator('#message').filter({hasText:'ikke lagret'}).waitFor();
+ assert.equal(await page.locator('#message').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+ await page.evaluate(()=>Storage.prototype.setItem=window.realWrite);
+ await page.keyboard.press('Tab');await page.locator('.day-number').first().focus();
+ assert.equal(await page.locator('.day-number').first().evaluate(el=>getComputedStyle(el).outlineColor),'rgb(0, 0, 0)');
+ assert.match(await page.locator('.day-number').first().evaluate(el=>getComputedStyle(el).boxShadow),/255, 255, 255/);
+ assert.deepEqual(errors,[]);await context.close();console.log('Appearance checks passed: preview, cancel, save/reload, reset, image, invalid image, failures, stale saves, task preservation, dark colours, focus, concurrent saves and async cancellation.');
+}finally{await browser.close();}

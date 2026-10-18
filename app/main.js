@@ -42,7 +42,9 @@ function canLeave() {
 async function persist(operation) {
   if (saving) return false;
   saving = true;
-  const controls = [...document.querySelectorAll('button, input, select, textarea')].map(node => [node, node.disabled]);
+  const controls = [...document.querySelectorAll('button, input, select, textarea')]
+    .filter(node=>!node.closest('#appearance-panel') && node.id!=='appearance-toggle')
+    .map(node => [node, node.disabled]);
   controls.forEach(([node]) => { node.disabled = true; });
   try {
     const write = () => { tasks = operation(); categoryList = readCategories(localStorage); };

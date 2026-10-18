@@ -20,3 +20,25 @@
 .legend{flex-wrap:wrap}.legend span{max-width:100%;overflow-wrap:anywhere}.category-tools{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:0 26px 18px}.category-tools label,#category-form label{display:flex;align-items:center;gap:10px;min-width:0;max-width:100%}.category-tools select,#category-name{padding:8px;border:1px solid #aab7c4;border-radius:6px;max-width:100%;min-width:0}#filter-status{flex-basis:100%;font-size:12px;color:#5c6875;margin:0;overflow-wrap:anywhere}#category-form label{margin-bottom:14px}#category-color{width:60px;height:36px}.custom-category{--stripe:#557799;background:#edf2f7}
 
 .category-row{border-top:1px solid #c7cfd8;padding:18px 0;display:flex;flex-wrap:wrap;gap:12px;align-items:center}.category-row h4{flex-basis:100%;margin:0;overflow-wrap:anywhere}.category-row label{display:flex;gap:8px;align-items:center;min-width:0;max-width:100%}.category-row input:not([type=color]){font:inherit;min-width:0;max-width:100%;padding:8px;border:1px solid #aab7c4;border-radius:6px}.category-row input[type=color]{width:60px;height:38px}.category-swatches{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}.category-preview{flex-basis:100%;display:flex;flex-direction:column;padding:12px;overflow-wrap:anywhere}.category-row .error{flex-basis:100%;margin:0}.category-row .error:empty{display:none}
+
+/* Appearance colours affect surfaces, never category cards or form readability. */
+:root{background-color:var(--page-bg,#f5f6f8);background-image:var(--page-image,none);background-size:cover;background-position:center;background-attachment:fixed;min-height:100%}
+.calendar-card{background:var(--calendar-bg,#ffffff);color:var(--calendar-text,#000000)}
+.calendar-card>.toolbar .eyebrow,.calendar-card>.hint,.calendar-card>.category-tools #filter-status,.calendar-card>.tidy-toolbar p{color:var(--calendar-text,#000000)}
+.day,.day.empty,.day.is-today{background:var(--days-bg,#ffffff);color:var(--days-text,#000000)}
+.day.empty{background:var(--empty-bg,#fafbfc)}.day.is-today{background:var(--today-bg,#f8fbff)}
+.day-number{color:var(--days-text,#000000)}
+.day-number[aria-expanded=true],.day-number:hover{color:#244f83}
+.day.is-today{box-shadow:inset 0 0 0 2px #386db1,inset 0 0 0 4px white}
+.today-label{background:white;border-radius:3px;padding:2px}
+.day .add{background:white;color:#25313d}
+.weekdays,.completed-panel,.expanded-day,.editor{color:#25313d}
+.task,.legend span{color:#25313d}
+.custom-surround .app-header,.custom-surround footer{background:#f5f6f8;padding:16px;border-radius:12px}
+#appearance-form label{display:flex;align-items:center;gap:12px;margin:18px 0;flex-wrap:wrap}
+#appearance-form input[type=color]{height:38px;width:64px}
+#appearance-form input[type=file]{max-width:100%}
+.appearance-themes{display:flex;flex-wrap:wrap;gap:8px}
+#appearance-form button{margin:0 4px 6px 0}
+#message.error:not(:empty){background:#fff;color:#ac1825;padding-top:12px}
+.calendar-card :focus-visible{outline:2px solid #000;box-shadow:0 0 0 5px #fff}
