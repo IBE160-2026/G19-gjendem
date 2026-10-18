@@ -42,3 +42,8 @@
 #appearance-form button{margin:0 4px 6px 0}
 #message.error:not(:empty){background:#fff;color:#ac1825;padding-top:12px}
 .calendar-card :focus-visible{outline:2px solid #000;box-shadow:0 0 0 5px #fff}
+.month-grid{background-image:var(--grid-image,none);background-size:cover;background-position:center;background-repeat:no-repeat}
+.has-grid-image .day,.has-grid-image .day.empty,.has-grid-image .day.is-today{background:transparent}
+.has-grid-image .day-number{background:#fff;color:#25313d;border-radius:4px}
+.has-grid-image .day-number[aria-expanded=true]{background:#e0edff;color:#244f83}
+.has-grid-image .day{border-color:rgba(255,255,255,.8)}

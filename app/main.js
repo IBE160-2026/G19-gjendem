@@ -71,6 +71,7 @@ function render() {
   const week = element('div', undefined, 'weekdays');
   for (const day of ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']) week.append(element('span', day));
   calendar.append(week);
+  const grid=element('div',undefined,'month-grid');calendar.append(grid);
   const days = monthDays(year, month);
   const today = dateKey(new Date());
   for (let i = 0; i < days.length; i += 7) {
@@ -101,7 +102,7 @@ function render() {
       for (const task of visibleTasks().filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
       row.append(cell);
     }
-    calendar.append(row);
+    grid.append(row);
   }
   if (expandedDate) drawDay();
   drawUpcoming();

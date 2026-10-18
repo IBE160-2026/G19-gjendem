@@ -18,3 +18,11 @@ test('contrast selects readable black or white across RGB samples',()=>{
   const ratio=textColour(hex)==='#ffffff'?1.05/(luminance+.05):(luminance+.05)/.05;assert.ok(ratio>=4.5);
  }
 });
+test('grid image is optional in old preferences and independently validated',()=>{
+ const old={...defaultAppearance};delete old.gridImage;
+ assert.equal(parseAppearance(JSON.stringify(old)).gridImage,'');
+ const image='data:image/jpeg;base64,AAAA';
+ const result=parseAppearance(JSON.stringify({...defaultAppearance,image,gridImage:image}));
+ assert.equal(result.image,image);assert.equal(result.gridImage,image);
+ for(const gridImage of [null,42,'https://example.com/a.jpg','data:image/svg+xml;base64,AAAA','x'.repeat(1500001)])assert.throws(()=>parseAppearance(JSON.stringify({...defaultAppearance,gridImage})));
+});

@@ -2,6 +2,8 @@
 
 Requires Node.js (verified locally with 24.19.0). No package installation is needed.
 
+The separate "Bilde bak hele rutenettet" picker adds one cover-cropped image behind the whole month grid, including blank leading/trailing cells. It does not repeat per day. Task cards and date labels remain opaque; expanded-day and editing panels remain readable. Both photo choices share Save/Cancel/reset but have separate remove buttons and independent loading jobs. Older appearance records without gridImage remain valid. `node app/grid-image-check.mjs` verifies continuous rendering, navigation, persistence and cancellation. Both photos use the limits below; the browser may reject saving if their combined size exceeds available storage, retaining the draft for retry.
+
 Appearance: "Tilpass utseende" below the calendar offers presets and separate surrounding, calendar and day-cell colours. A JPG/PNG/WebP photo fills the viewport background with centred cover cropping. Files are processed locally (maximum 10 MiB / 40 megapixels, resized to 1600px and re-encoded as JPEG, capped at 1.5 million data-URL characters); nothing is uploaded. The browser must have enough local storage. Preview is immediate; Save persists, Cancel restores the latest saved version. Reset previews defaults and requires Save. It never resets categories or tasks. Choices use a separate versioned storage key and stale saves from another tab are rejected. Clearing site data removes appearance as well as tasks. Restart the local server after updating it to serve the new appearance module. Verify with `node --test app/appearance.test.mjs` and `node app/appearance-check.mjs` (Playwright setup below).
 
 From the repository folder in the VS Code terminal:

@@ -29,7 +29,7 @@ try{
  await page.locator('#appearance-image-state').filter({hasText:'valgt'}).waitFor();await save();
  assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundSize),'cover');
  await page.reload();assert.match(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
- await open();await page.locator('#appearance-image').setInputFiles({name:'invalid.png',mimeType:'image/png',buffer:Buffer.from('not image')});await page.locator('#appearance-error').filter({hasText:'Kunne ikke lese'}).waitFor();
+ await open();await page.locator('#appearance-image').setInputFiles({name:'invalid.png',mimeType:'image/png',buffer:Buffer.from('not image')});await page.locator('#appearance-image-error').filter({hasText:'Kunne ikke lese'}).waitFor();
  assert.match(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
  const other=await context.newPage();await other.goto('http://localhost:5173');await other.locator('#appearance-toggle').click();await other.locator('[data-theme=warm]').click();await other.locator('#appearance-save').click();await other.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();
  await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'annen fane'}).waitFor();await page.locator('#appearance-cancel').click();

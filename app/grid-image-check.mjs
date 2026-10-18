@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const browser=await chromium.launch({headless:true,channel:'msedge'});
+try {
+ const context=await browser.newContext({viewport:{width:1500,height:1100}}),page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://localhost:5173');
+ const date=await page.locator('[aria-current=date]').getAttribute('data-date');
+ await page.evaluate(date=>localStorage.setItem('smart-todo.v1',JSON.stringify({version:1,tasks:[{id:'x',title:'Testoppgave',date,category:'Jobb'}]})),date);await page.reload();
+ const tasks=await page.evaluate(()=>localStorage.getItem('smart-todo.v1'));
+ const image=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=1600;c.height=1000;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,1600,1000);g.addColorStop(0,'#173b55');g.addColorStop(.5,'#8caeaa');g.addColorStop(1,'#f6dcae');x.fillStyle=g;x.fillRect(0,0,1600,1000);x.fillStyle='#d1c4e9';x.beginPath();x.arc(1100,180,100,0,Math.PI*2);x.fill();return c.toDataURL('image/png').split(',')[1];});
+ const file={name:'grid.png',mimeType:'image/png',buffer:Buffer.from(image,'base64')};
+ const open=()=>page.locator('#appearance-toggle').click();const save=async()=>{await page.locator('#appearance-save').click();await page.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();};
+ await open();await page.locator('#appearance-grid-image').setInputFiles(file);await page.locator('#appearance-grid-state').filter({hasText:'valgt'}).waitFor();
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),null);
+ assert.equal(await page.locator('.month-grid').count(),1);assert.match(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
+ assert.equal(await page.locator('.day').first().evaluate(el=>getComputedStyle(el).backgroundColor),'rgba(0, 0, 0, 0)');
+ assert.equal(await page.locator('.day-number').first().evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
+ assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+ await page.locator('#appearance-cancel').click();assert.equal(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+ await open();await page.locator('#appearance-grid-image').setInputFiles(file);await page.locator('#appearance-grid-state').filter({hasText:'valgt'}).waitFor();await save();await page.reload();
+ assert.match(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
+ await page.locator('#next').click();assert.match(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);await page.locator('#today').click();
+ await page.locator(`[data-date="${date}"] .day-number`).click();assert.equal(await page.locator('#expanded-day').isVisible(),true);await page.getByRole('button',{name:'Lukk dagen',exact:true}).click();
+ await page.screenshot({path:'app/test-results/grid-image.png',fullPage:true});
+ await open();await page.locator('#appearance-grid-remove').click();await page.locator('#appearance-cancel').click();assert.match(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
+ // Independent async jobs: removing grid photo must not cancel surrounding photo or revive grid.
+ await open();await page.evaluate(()=>{window.originalBitmap=window.createImageBitmap;window.jobs=[];window.createImageBitmap=(...args)=>new Promise((resolve,reject)=>window.jobs.push(()=>window.originalBitmap(...args).then(resolve,reject)));});
+ await page.locator('#appearance-image').setInputFiles(file);await page.locator('#appearance-grid-image').setInputFiles(file);
+ assert.equal(await page.locator('#appearance-save').isDisabled(),true);
+ await page.locator('#appearance-grid-remove').click();await page.evaluate(()=>window.jobs[1]());
+ assert.equal(await page.locator('#appearance-save').isDisabled(),true);assert.equal(await page.locator('.month-grid').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
+ await page.evaluate(()=>window.jobs[0]());await page.locator('#appearance-image-state').filter({hasText:'valgt'}).waitFor();await save();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('smart-todo.appearance.v1')));assert.ok(saved.image);assert.equal(saved.gridImage,'');
+ await page.locator('#appearance-reset').click();await save();await page.reload();assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),'none');assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.v1')),tasks);
+ await open();await page.evaluate(()=>{window.originalBitmap=window.createImageBitmap;window.jobs=[];window.createImageBitmap=(...args)=>new Promise((resolve,reject)=>window.jobs.push(()=>window.originalBitmap(...args).then(resolve,reject)));});
+ await page.locator('#appearance-image').setInputFiles(file);await page.locator('#appearance-grid-image').setInputFiles({name:'bad.png',mimeType:'image/png',buffer:Buffer.from('not image')});
+ await page.evaluate(()=>window.jobs[1]());await page.locator('#appearance-grid-image-error').filter({hasText:'Kunne ikke lese'}).waitFor();
+ await page.evaluate(()=>window.jobs[0]());await page.locator('#appearance-image-state').filter({hasText:'valgt'}).waitFor();
+ assert.match(await page.locator('#appearance-grid-image-error').innerText(),/Kunne ikke lese/);
+ assert.deepEqual(errors,[]);await context.close();console.log('Grid image checks passed: continuous layer, preview/cancel/save/reload/remove/reset, navigation, expanded day, independent async jobs and persistent upload errors.');
+}finally{await browser.close();}
