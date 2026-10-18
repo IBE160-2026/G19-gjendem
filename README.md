@@ -27,7 +27,7 @@ No package installation, account or API key is needed to run the current app. If
 - **Administrer kategorier** edits names and colours with presets, custom colour and a preview. Save applies to all linked tasks, including completed tasks; Cancel discards the row's draft. Renamed Ellers remains the default.
 - **Tilpass utseende** previews background, calendar and day colours or a local background photo. Save retains choices, Cancel restores saved appearance, and Reset previews the defaults without changing tasks/categories.
 - **Bilde bak hele rutenettet** adds one continuous photo behind all day cells, independently of the surrounding photo. Date labels and task cards stay readable. Remove the calendar photo to reveal the chosen day colour.
-- Named Norwegian holidays show a red date, holiday names and a small red flag at the bottom-right. The current annual rules are calculated for 1900–2099; task entry is unchanged and coinciding holidays show both names.
+- Named Norwegian holidays show a red date, holiday names and a small Norwegian flag at the bottom-right. The current annual rules are calculated for 1900–2099; task entry is unchanged and coinciding holidays show both names.
 - Optional start/end times on the same date. Time choices use five-minute steps; the timetable opens at noon. Overlapping unfinished tasks show red text and an overlap label. Tasks that end exactly when another starts do not conflict.
 - Left sidebar for today, the rest of the week and next week onwards, with two tasks per section and inline expansion.
 - **Uten dato** for tasks to schedule later, **Rydd side** to hide completed tasks without deleting them, and **Fullført** to view or reopen completed tasks.

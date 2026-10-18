@@ -70,7 +70,7 @@ function render() {
   const holidays=norwegianHolidays(year);
   document.querySelector('#holiday-note').textContent=year<holidayMinYear||year>holidayMaxYear
     ? `Helligdager vises bare for ${holidayMinYear}–${holidayMaxYear}. Du kan fortsatt bruke kalenderen.`
-    : 'Rødt flagg markerer navngitte hellig- og høytidsdager.';
+    : 'Norsk flagg markerer navngitte hellig- og høytidsdager.';
   document.querySelector('#month').textContent = new Intl.DateTimeFormat('nb-NO', {month: 'long', year: 'numeric'}).format(shown);
   calendar.replaceChildren();
   const week = element('div', undefined, 'weekdays');

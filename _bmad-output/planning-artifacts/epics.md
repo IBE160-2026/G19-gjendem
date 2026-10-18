@@ -2,7 +2,7 @@
 title: Smart To-Do — detailed calendar stories
 status: draft
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-18
 stepsCompleted: [step-01-validate-prerequisites, step-02-design-epics]
 currentStep: step-03-create-stories
 inputDocuments:
@@ -146,7 +146,9 @@ So that I can see which tasks need a decision.
 
 **Confirmed multi-task behavior:** Keep the review window open while qualifying tasks remain so the user can handle the rest. Each task has its own "Lagre som utført" and "Endre" actions; neither action applies to the whole list. Close after the last qualifying task is successfully resolved, or when the user explicitly uses the upper-left cross.
 
-**Open design choice:** Sort order.
+**Confirmed order — 18 October 2026:** Show tasks by their assigned calendar date, oldest first (not by record creation date).
+
+- **Given** qualifying tasks from different past dates, **when** the review list opens or refreshes after saving, **then** the oldest task dates appear first regardless of entry order.
 
 ### Story 1.3: Reschedule or complete a listed task
 
@@ -161,7 +163,8 @@ So that the overview reflects my current plans.
 - **Given** a listed task, **when** I choose "Endre", open its editor, change its date to today or later and save successfully, **then** the same task moves to that calendar date, leaves the past-unfinished list and keeps its other details.
 - **Given** a listed task is moved to another past date, **when** the save succeeds, **then** it stays in the list with the new date.
 - **Given** a listed task, **when** I choose "Lagre som utført" and saving succeeds, **then** it leaves this unfinished-only list but remains available in Fullført and follows existing visible-completion/cleanup rules elsewhere. The window stays open for remaining tasks, with its count updated; it closes when no qualifying tasks remain.
-- **Given** I choose "Endre" for one task, **when** I edit and return to the review, **then** no saved data changes until I explicitly save; cancelling returns to the unresolved list. Successful saving refreshes the list and count, retaining the window while other qualifying tasks remain. Exact editor placement is a design detail to settle before implementation.
+- **Given** I choose "Endre" for one task, **when** I edit and return to the review, **then** no saved data changes until I explicitly save; cancelling returns to the unresolved list. Successful saving refreshes the list and count, retaining the window while other qualifying tasks remain. The editor opens inside the same review window, not in another browser tab or in the calendar behind it. After successful saving, return to the updated list inside that window; close only when no qualifying tasks remain.
+- **Given** I am editing inside the review window, **when** I cancel, **then** return to the list without changing the saved task. If the draft has changes, retain the existing discard-confirmation behavior.
 - **Given** completion saving fails, **when** the failure is reported, **then** keep the review window open and leave the task unfinished.
 - **Given** I cancel editing or saving fails, **when** the action ends, **then** saved task data and the count are not falsely updated; failed saves retain the draft and report an error.
 - **Given** another tab changed the task after its editor opened, **when** I attempt to save a stale edit, **then** the newer saved task is preserved and the existing conflict message retains my draft.
@@ -181,7 +184,15 @@ So that tasks do not disappear simply because I reviewed them.
 - **Given** a successful date or completion change, **when** the list updates, **then** the count matches the remaining qualifying records; when none remain, the notice disappears. Handling one task must not silently complete or dismiss other tasks. Keep the window open while any qualifying tasks remain; close it after the last task is successfully resolved.
 - **Given** I only inspect the list, **when** I return later, **then** inspection alone has not completed, rescheduled or cleaned up any task.
 
-**Boundary to settle:** Refresh after midnight while the app stays open, and refreshing from another tab without discarding an unsaved editor. Preserve existing draft-protection behavior; do not add background notifications.
+**Confirmed refresh behavior — 18 October 2026:**
+
+- **Given** the calendar remains open across local midnight, **when** the current day changes, **then** automatically recalculate the past-unfinished count from saved tasks using the new local date; do not open the large review window or move focus just because the count changed.
+- **Given** the app was inactive or the PC asleep across midnight, **when** the user returns to the calendar, **then** refresh the count using the actual local date without forcing the review window open.
+- **Given** qualifying tasks remain after a date change, **when** I activate the review action, **then** I can open their updated overview; the opening notice also includes them on the next calendar visit.
+- **Given** another tab changes saved tasks, **when** this tab refreshes its overview, **then** it must not erase or replace an unsaved editor draft, reset focus or close the editor. If a view refresh would discard the draft, defer that refresh until editing safely ends and explain that saved data changed.
+- **Given** another tab changed the same task I am editing, **when** I attempt to save an outdated edit, **then** retain my draft and use the existing conflict handling rather than silently overwrite the newer saved record.
+
+These refreshes never create operating-system/background notifications. Display counts are based on saved records, not unsaved draft values.
 
 ## Epics 2–5: Next planning conversations
 
@@ -196,3 +207,9 @@ Retain the five provisional stories in the approved overview. Do not choose a pr
 Paused at the user's request after recording Epic 1 interaction decisions. All qualifying past unfinished tasks are shown together in a near-full-screen window. Each has completion/edit actions; successful handling updates the list and keeps the window open while tasks remain. The upper-left cross closes without resolving remaining tasks, which are included in the notice on the next visit. Outside clicks and Escape do not close the review. No application implementation was performed in this planning session.
 
 Next session: finish Epic 1 criteria by settling sort order, editor placement and refresh behavior while the app stays open; then continue detailed stories for Epics 2–5. Preserve the approved six-epic overview. AI planning and implementation remain deferred until calendar acceptance. Before implementation, reconcile newly approved behavior with PRD/UX. Do not treat this draft as completed or implemented.
+
+## Planning continuation — 18 October 2026
+
+The user confirmed oldest task dates first and editing inside the same review window, returning to the refreshed list after saving. These decisions resolve the sort-order and editor-placement items in the historical 13 October handoff. Previously approved dismissal, completion and recurrence rules are unchanged. This is a documentation update, not an implementation.
+
+The user subsequently confirmed automatic count refresh across local midnight without forcing the review window open, plus preservation of unsaved edits when another tab changes saved data. These refresh decisions are captured in Story 1.4. Next: continue detailed calendar stories for Epics 2–5 and reconcile new requirements with PRD/UX before coding. Epic 6 remains deferred until calendar acceptance.
