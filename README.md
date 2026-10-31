@@ -4,7 +4,15 @@ Solo project in **IBE160 Programming with AI**, Molde University College, autumn
 
 Smart To-Do brings personal tasks for work, school, family and other responsibilities into one calendar. It runs locally in a PC browser with Norwegian Bokmål controls. Development follows the BMAD method with AI assistance.
 
-## Start the app
+## Open the published calendar
+
+[Open Smart To-Do](https://g19-gjendem.vercel.app/)
+
+The calendar is published on Vercel and can be opened without installing Node.js. Tasks and appearance settings are stored in the current browser, not in a shared online database. Data from localhost does not automatically transfer to this address, and devices do not sync.
+
+Deployment settings: Root Directory `app`, Application Preset `Other`, empty Build and Install commands, Output Directory `.`.
+
+## Start the app locally
 
 1. Install Node.js if it is not available. The app has been verified with Node.js 24.19.0. Check with `node --version`.
 2. Download or clone this repository, then open its root folder in VS Code.
