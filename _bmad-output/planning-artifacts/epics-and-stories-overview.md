@@ -1,7 +1,7 @@
 ---
 title: Smart To-Do — remaining epics and stories
 created: 2026-10-13
-updated: 2026-10-18
+updated: 2026-11-02
 status: approved-overview
 ---
 
@@ -63,7 +63,19 @@ The following are provisional stories. Detailed AI planning starts only after Ep
 
 No AI provider, model or implementation has been selected. Free-text interpretation, priority suggestions and summaries remain possible later extensions, not additional approved stories.
 
-## Relationship to existing plans
+## Epic 7 — Adapt the calendar to mobile and larger PC screens
+
+**Status:** Approved backlog, not started. Recorded 2 November 2026 at the user's request; do not start implementation now. The existing work order remains unchanged: resume the pending past-unfinished review (Epic 1 / PRD FR-17–18). Epic numbers are stable identifiers, not a revised delivery sequence. Scheduling Epic 7 relative to the remaining acceptance work and deferred AI will be settled later.
+
+- **7.1 Mobile month:** Keep the entire month as the mobile start view, with all seven weekday columns visible. Show up to two shortened task previews per day and the actual remaining count, for example "+3 flere".
+- **7.2 Mobile day:** Tapping a day opens a near-full-screen day view with all that day's tasks. Untimed tasks appear above the timetable; closing returns to the month. This presentation applies only on mobile.
+- **7.3 Mobile overview:** Place "I dag", "Denne uken" and "Kommende" below the calendar, reached by vertical scrolling rather than a separate drawer.
+- **7.4 Preserve PC and use larger screens:** Retain the existing PC layout, left sidebar and in-calendar expanded-day behaviour. Let the calendar use more width on larger PC screens without changing that arrangement.
+- **7.5 Screen and interaction checks:** Verify the agreed layouts and task flows on mobile and PC, including touch input and the mobile keyboard. Ensure category colours, holidays, appearance settings, completion and conflict indicators remain usable.
+
+See [Epic 7 details and acceptance criteria](epic-7-responsive-calendar.md). This is a scoped record of approved discussion, not a completed full BMAD implementation-readiness workflow. No app code changes or new synchronisation features are authorised by this planning entry.
+
+## Relationship to existing plans (historical overview)
 
 Epics 1–2 complete or extend PRD FR-7/FR-8; Epic 5 supports the existing acceptance targets; Epic 6 retains the deferred intent of FR-9/FR-10. The opening notice, renaming/recolouring categories, appearance customisation and holiday display are newly approved additions from the discussion after the PRD reconciliation. Update the affected PRD/UX requirements before implementing them; do not treat them as already covered by the earlier PRD.
 
