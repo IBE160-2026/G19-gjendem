@@ -6,3 +6,6 @@
 
 
 
+
+- [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Implementere FR-17–18 og samordne eldre UX/story-tekst ved oppstart.
+- [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Fullføre ti-oppgavers akseptansetest og to eksterne brukertester før KI-trinnet.
