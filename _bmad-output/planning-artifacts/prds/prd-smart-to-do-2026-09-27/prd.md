@@ -115,6 +115,8 @@ The agreed scope excludes task sharing, team administration, account synchronisa
 
 **Change record:**
 
+- **23 November 2026 — categories:** Epic 2 / FR-8 locally accepted with [combined test evidence](../../../implementation-artifacts/epic-2-acceptance.md). Consolidated Stories 2.1–2.3 and documented the existing all-category exception for the past review. No new category requirements or production/user-trial acceptance claimed.
+
 - **23 November 2026:** Closed Epic 1 locally with requirement-to-test evidence, including midnight/inactivity refresh, cross-tab draft protection and per-task actions. No new requirements, production deployment or external user acceptance claimed.
 
 - **13 October 2026:** Retained FR-1–13, added FR-14 for recoverable cleanup, settled time rules and recorded calendar-first sequencing.

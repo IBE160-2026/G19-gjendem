@@ -34,7 +34,13 @@ try {
  const other=await context.newPage();await other.goto('http://localhost:5173');await other.locator('#manage-categories').click();
  const otherRow=other.locator('[data-category-id="Ellers"]');await otherRow.getByLabel('Navn',{exact:true}).fill('Personlig');
  await otherRow.getByRole('button',{name:'Lagre kategori',exact:true}).click();await other.waitForFunction(()=>JSON.parse(localStorage.getItem('smart-todo.v1')).categoryOverrides.Ellers.name==='Personlig');
- await row.getByLabel('Navn',{exact:true}).fill('Gammelt utkast');await row.getByRole('button',{name:'Lagre kategori',exact:true}).click();await row.getByRole('alert').filter({hasText:'annen fane'}).waitFor();
+ await row.getByLabel('Navn',{exact:true}).fill('Gammelt utkast');await row.getByLabel('Egen farge',{exact:true}).fill('#ff8800');
+ const savedBeforeStale=await page.evaluate(()=>localStorage.getItem('smart-todo.v1'));
+ await row.getByRole('button',{name:'Lagre kategori',exact:true}).click();await row.getByRole('alert').filter({hasText:'annen fane'}).waitFor();
+ assert.equal(await row.getByLabel('Navn',{exact:true}).inputValue(),'Gammelt utkast');
+ assert.equal(await row.getByLabel('Egen farge',{exact:true}).inputValue(),'#ff8800');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.v1')),savedBeforeStale);
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('smart-todo.v1')).categoryOverrides.Ellers.name),'Personlig');
  await row.getByRole('button',{name:'Avbryt',exact:true}).click();
  await page.getByRole('button',{name:'Lukk kategorier',exact:true}).click();
  await page.locator(`[data-date="${date}"] .add`).click();assert.equal(await page.getByLabel('Kategori',{exact:true}).locator('option:checked').innerText(),'Personlig');

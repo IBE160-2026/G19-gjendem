@@ -31,7 +31,7 @@ No package installation, account or API key is needed to run the current app. If
 - Month calendar with today marked, an expanded daily timetable and a separate list for that day's tasks without times.
 - Create, edit, complete, reopen and delete tasks, with optional descriptions and dates.
 - Jobb (blue), Skole (yellow), Familie (green) and Ellers (light brown), with Ellers as the default.
-- **Vis kategori** filters every task view; **Vis alle** restores the overview. **+ Ny kategori** saves a custom name and colour. Conflicts still consider hidden categories.
+- **Vis kategori** filters month/day, upcoming, undated and completed views; **Vis alle** restores the overview. The past-unfinished review always spans all categories. **+ Ny kategori** saves a custom name and colour. Conflicts and cleanup still consider hidden categories.
 - **Administrer kategorier** edits names and colours with presets, custom colour and a preview. Save applies to all linked tasks, including completed tasks; Cancel discards the row's draft. Renamed Ellers remains the default.
 - **Tilpass utseende** previews background, calendar and day colours or a local background photo. Save retains choices, Cancel restores saved appearance, and Reset previews the defaults without changing tasks/categories.
 - **Bilde bak hele rutenettet** adds one continuous photo behind all day cells, independently of the surrounding photo. Date labels and task cards stay readable. Remove the calendar photo to reveal the chosen day colour.
@@ -42,6 +42,8 @@ No package installation, account or API key is needed to run the current app. If
 - Local saving, failed-save feedback and protection against stale edits from another browser tab.
 
 ## Planned work
+
+Epic 2 / FR-8 is complete and locally accepted; see the [category acceptance evidence](_bmad-output/implementation-artifacts/epic-2-acceptance.md). Filtering, category creation and rename/recolour were checked together, including completed tasks, saved drafts and the past-review window.
 
 The past-unfinished review is available: a notice counts incomplete tasks dated before today; "Se uferdige oppgaver" opens a near-full-screen list, oldest dates first, across all categories. Each task has "Lagre som utført" and "Endre". Editing uses the task form inside the same window; successful handling returns to the remaining list and the window closes when none remain. Completion preserves the task in Fullført. Cancel preserves saved data, and changed drafts require confirmation before discarding. Failed or stale saves retain the draft. The upper-left cross closes the window; Escape and backdrop clicks do not dismiss it. The notice returns on future visits while qualifying tasks remain. Date and cross-tab refresh do not force the window open or discard editor drafts.
 
@@ -83,6 +85,7 @@ node app/completed-check.mjs
 node app/undated-check.mjs
 node app/categories-check.mjs
 node app/category-edit-check.mjs
+node app/category-acceptance-check.mjs
 node app/appearance-check.mjs
 node app/grid-image-check.mjs
 node app/holidays-check.mjs

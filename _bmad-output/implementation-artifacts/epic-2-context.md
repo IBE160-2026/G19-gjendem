@@ -4,7 +4,7 @@
 
 ## Goal
 
-Help the user organise personal work, study and family tasks by filtering the calendar overview and creating or updating categories, while preserving every existing task and its category association. The approved overview supplies this epic's stories; detailed criteria are not yet present in the main epics file. The current implementation request prioritises category filtering and custom categories. Category editing remains part of the approved epic scope, without implying that all three stories must ship in this increment.
+Help the user organise personal work, study and family tasks by filtering the calendar overview and creating or updating categories, while preserving every existing task and its category association. Filtering, custom-category creation and name/colour editing are already delivered; their combined Epic 2 local acceptance is complete as of 23 November 2026 (see epic-2-acceptance.md). The approved overview supplies the three stories; the updated PRD and detailed Epic 2 criteria resolve the category decisions recorded as open in older drafts. Calendar-wide acceptance remains separate work.
 
 ## Stories
 
@@ -14,34 +14,34 @@ Help the user organise personal work, study and family tasks by filtering the ca
 
 ## Requirements & Constraints
 
-- Each task has one category. Initially provide Jobb in blue, Skole in yellow, Familie in green and Ellers in light brown; Ellers is the default for task creation. Users may add categories. The approved extension permits renaming and recolouring existing categories, including defaults.
-- Selecting a category shows its matching tasks. Clearing the filter restores the complete applicable overview. Filtering is a display operation and must not delete, reschedule, complete or recategorise tasks.
+- Each task has one category. Initially provide Jobb in blue, Skole in yellow, Familie in green and Ellers in light brown. Users may add categories and rename or recolour any category, including defaults. The category initially called Ellers remains the task-creation default after renaming.
+- Selecting a category shows its matching tasks; clearing the filter restores all categories. Filtering is a display operation and must not delete, reschedule, complete or recategorise tasks. Hidden tasks still participate in conflict detection, and cleanup still applies across categories.
 - Tasks and categories must survive reopening in the same supported browser environment. Existing task identity, descriptions, dates, times, completion and cleanup state must survive category-related changes and any storage migration.
-- Category editing must retain task associations. Category identity, migration, default-category behaviour after renaming, filter scope and name validation remain decisions for the affected story specification; the planning documents do not establish their exact policies.
+- Saving a category updates its name and colour for all associated tasks, including completed tasks, without changing task identity or other details. Reject blank and duplicate names with feedback. Preview is unsaved until Save; Cancel discards the edit. Failed saves preserve the previous saved state and entered values.
 - Preserve the established task rules: completed tasks stay visible until explicit cleanup; Fullført retains all completed tasks; reopening restores their dated or undated location. Filtering must not be confused with cleanup or permanent task loss.
 - Preserve normal task editing and unsaved drafts. Failed saves must report an understandable error without claiming success or discarding input. Stale edits must not overwrite newer saved data from another tab.
-- Stage 1 remains local and requires no AI service, credentials, account system or cloud infrastructure. AI suggestions are deferred until calendar acceptance. Use fictional task data for demonstrations and checks.
-- Verify filtering and restoration across the surfaces included in the story's chosen scope, creation and reuse of custom categories, persistence after reopening, existing-task preservation and failure handling. The separate ten-task acceptance run and external user trials are not established by automated feature tests.
+- Stage 1 task data stays in the current browser profile and site address, including on the published site. It requires no AI service, credentials or account system. AI suggestions are deferred until calendar acceptance. Use fictional task data for demonstrations and checks.
+- Verify filtering and restoration, creation and reuse of custom categories, rename/recolour across active and completed tasks, the retained default after renaming, persistence after reopening, existing-task preservation and failed saves. Record expected and actual results without treating historical automated checks as current acceptance. The separate ten-task acceptance run, external user trials and published-site checks are not established by feature tests alone.
 
 ## Technical Decisions
 
-- Extend the existing plain HTML/CSS/JavaScript application and local Node server; do not recreate the historical Vite starter proposal. There is no finalised architecture document; the October requirements and subsequent approved decisions take precedence over the September technical draft.
+- Retain the plain HTML/CSS/JavaScript application. A local Node server supports development and startup; the published site serves the same frontend statically. Do not recreate the historical Vite proposal. There is no finalised architecture document; updated requirements and approved decisions supersede historical technical and UX proposals.
 - Keep a single task model with a category association and one optional local calendar date. Category work must not introduce multiple tags, separate deadline/work dates or automatic date changes.
 - Retain versioned browser storage. Read the latest saved state before writing, coordinate competing writes and reject stale changes. Successfully persist a mutation before presenting it as saved. Unreadable stored data must not be replaced with an empty collection.
-- Design any custom-category migration to preserve the saved task collection and its associations. Do not infer a migration policy from an older proposal; record the chosen behaviour in the relevant story.
-- Browser storage belongs to a browser profile and origin. Keep the established local address and port so existing tasks remain accessible. This persistence is not backup or cross-device synchronisation.
+- Category identity must remain independent of an editable display name so renaming preserves associations and the default category. Any storage migration must preserve the saved task collection and its associations; acceptance must not invent a new migration solely from an obsolete planning gap.
+- Browser storage belongs to a browser profile and origin. Keep the established local address and port so existing tasks remain accessible. Localhost and the published HTTPS site have separate data; publication does not transfer tasks. This persistence is not backup or cross-device synchronisation.
 - Render user-entered names as text, not executable markup. Store date-only values as local calendar dates without UTC conversion.
 
 ## UX & Interaction Patterns
 
 - Use Norwegian Bokmål for controls, labels, validation and feedback. Maintain the calm, month-first desktop layout, with upcoming tasks on the left and selected-day untimed tasks on the right.
-- Keep the active category filter visible and provide an obvious clear action. Distinguish a category with no matching tasks from a genuinely empty task collection. The category filter and management entry surfaces are not specified by existing mockups and need a concrete design in the implementation spec.
+- "Vis kategori" exposes the active single-category filter; "Vis alle" restores the overview. Distinguish no matching tasks from a genuinely empty task collection. "Administrer kategorier" opens a combined list for name and colour edits, offering presets and a custom colour with explicit Save and Cancel.
 - Show category names alongside colour in selectors and task displays. Preserve independent checkbox completion, strikethrough, today marking and red conflict titles with a textual conflict cue. A colour change must not obscure these meanings.
 - Normal text, including conflict and completed text, targets at least 4.5:1 contrast on its actual background; essential controls and focus boundaries target 3:1. Verify chosen custom colours rather than assuming the original palette guarantees readability.
 - Use labelled semantic controls, visible focus, keyboard access and sensible focus restoration. Preserve draft text and focus when validation or storage fails; do not discard an editor merely to refresh filtered results. Browser zoom must not make task access or category controls unreachable.
 
 ## Cross-Story Dependencies
 
-- Filtering and category management need a consistent category identity and lookup contract. Custom categories must become available to task assignment and filtering; later rename/recolour operations must keep those associations intact.
+- Filtering, creation and editing share stable category identity. Custom categories must become available for task assignment and filtering; rename/recolour operations must keep those associations intact.
 - Preserve the past-unfinished review and its saved-data-based count when defining filter scope. Its established rule includes all unfinished tasks dated before local today; filtering must not silently redefine that rule.
-- Epic 5 verifies category features together with existing calendar workflows. Epic 6 remains deferred until calendar acceptance. Appearance customisation and public holidays belong to separate epics.
+- Epic 1 is locally accepted; preserve its all-category past-unfinished workflow. Epic 5 verifies category features together with existing calendar workflows and external user trials. Epic 6 remains deferred until calendar acceptance. Appearance, holidays and responsive-layout work belong to separate epics.

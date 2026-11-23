@@ -24,11 +24,13 @@ No additional notices for today's tasks, time conflicts or undated tasks were se
 
 ## Epic 2 — Organise tasks by category
 
+**Status — 23 November 2026:** Stories 2.1–2.3 complete and locally accepted. [Detailed criteria](epics.md#epic-2-organise-tasks-by-category) and [test evidence](../implementation-artifacts/epic-2-acceptance.md) record the combined check.
+
 - **2.1 Filter:** Show tasks for a selected category and restore all categories when the filter is cleared.
 - **2.2 Create categories:** Add user-defined task categories.
 - **2.3 Edit categories:** Change category names and colours, including the existing default categories.
 
-Detailed stories must clarify category identity, existing-task preservation, default-category behaviour and filter scope before implementation.
+Category identity is stable across rename/recolour; the original Ellers stays the default. Normal task views follow the filter, while conflicts, cleanup and the past-unfinished review span all categories. Filtering resets on reload and does not modify records.
 
 ## Epic 3 — Customise calendar appearance
 

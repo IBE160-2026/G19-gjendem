@@ -21,7 +21,7 @@ inputDocuments:
 
 **Current delivery status — 23 November 2026:** Epic 1 and Stories 1.1–1.4 are complete and locally accepted. See [acceptance evidence](../implementation-artifacts/epic-1-acceptance.md). Older planning and increment entries below describe their state at the time. The overall detailed-story workflow and calendar-wide user acceptance remain incomplete.
 
-This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are locally accepted; Epics 2–5 still need their detailed planning records reconciled with delivered increments. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
+This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are locally accepted; Epics 3–5 still need their detailed planning records reconciled with delivered increments. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
 
 Source precedence: the October PRD, its technical addendum, implementation records and subsequent user-approved overview supersede historical proposals in the September technical/UX drafts. The technical plan is not a finalized architecture: Vite scaffolding and unsettled time rules are obsolete proposals, not new work to recreate. New notice, category-editing, appearance and holiday requirements must be reconciled with PRD/UX before their implementation.
 
@@ -85,7 +85,7 @@ Source precedence: the October PRD, its technical addendum, implementation recor
 | FR-1, FR-2, FR-3, FR-4 | Existing app increments; Epic 1 reuses editing/completion, Epic 2 preserves data, Epic 5 regression acceptance |
 | FR-5, FR-6 | Existing calendar/timetable; Epics 3–4 must preserve them; Epic 5 acceptance |
 | FR-7 | Undated already implemented; Epic 1 completes separate past-unfinished access |
-| FR-8 | Four categories already implemented; Epic 2 adds filtering and category management |
+| FR-8 | Epic 2 filtering, creation and category editing locally accepted; see epic-2-acceptance.md |
 | FR-9, FR-10 | Epic 6, deferred |
 | FR-11, FR-12, FR-13, FR-14 | Existing sidebar/times/editor/cleanup increments; Epic 5 regression acceptance |
 | ADD-1 | Epic 1 |
@@ -196,9 +196,35 @@ So that tasks do not disappear simply because I reviewed them.
 
 These refreshes never create operating-system/background notifications. Display counts are based on saved records, not unsaved draft values.
 
-## Epics 2–5: Next planning conversations
+## Epic 2: Organise tasks by category
 
-The approved stories remain in the overview; detailed criteria are not yet written here. Outstanding choices include filter scope, category identity/default behavior, category rename validation, safe colour contrast, image limits and storage, reset scope, exact public-holiday coverage/year range and acceptance-test setup. Resolve choices for each affected story before marking it ready for development.
+**Status:** Stories 2.1–2.3 delivered and locally accepted 23 November 2026. These criteria consolidate the approved implementation records; they do not add features. See [acceptance evidence](../implementation-artifacts/epic-2-acceptance.md).
+
+### Story 2.1: Filter tasks by category
+
+- Given tasks in several categories, when one category is selected, then month/day, upcoming, undated and completed views show matching tasks without modifying saved records.
+- Given an active filter, when Vis alle is used or the page reloads, then all categories are shown again. A category with no tasks has an explanatory empty state.
+- Given hidden categories, when conflicts are calculated or Rydd side is used, then all categories still participate. The past-unfinished review deliberately remains across all categories.
+- Given an open task draft, when the filter changes, then fields remain intact; saving into another category follows that category so the result remains visible.
+
+### Story 2.2: Create user-defined categories
+
+- Given a trimmed unique name of 1–40 characters and a valid colour, when saved, then the category is available in the filter, legend and task editor and survives reload.
+- Given blank, duplicate (case-insensitive and Unicode-normalised) names or invalid colours, when submitted, then creation is rejected without changing saved data. Names are rendered as text.
+- Given storage failure or simultaneous category creation, when saving, then existing tasks and category metadata survive; failed drafts remain editable and duplicate names cannot be created.
+- Given an existing task draft, when a category is created, then its fields and selected category are preserved. New tasks still default to the original Ellers category.
+
+### Story 2.3: Edit category names and colours
+
+- Given Administrer kategorier, when opened, then all categories provide name, preset/custom colour, preview, Save and Cancel controls.
+- Given edited values, when previewed or cancelled, then saved categories and tasks remain unchanged until explicit Save.
+- Given a saved rename/recolour, when viewing active, completed or archived tasks, then their category display changes while IDs, titles, descriptions, dates, times and completion/cleanup states remain unchanged, including after reload.
+- Given renamed Ellers, when adding a task, then the same category remains the default under its new display name.
+- Given a duplicate, failed write or stale edit, when saving, then reject it with feedback and retain the draft. Existing task drafts also survive category edits.
+
+## Epics 3–5: Remaining planning reconciliation
+
+The approved stories remain in the overview. Reconcile delivered appearance and holiday decisions with their implementation records before final acceptance; do not rebuild them from historical open questions. Calendar-wide acceptance and external trials still belong to Epic 5.
 
 ## Epic 6: Deferred
 
