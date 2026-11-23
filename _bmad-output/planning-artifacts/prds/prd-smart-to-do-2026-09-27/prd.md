@@ -95,7 +95,7 @@ The following are acceptance targets. Existing automated checks cover parts of t
 
 The agreed scope excludes task sharing, team administration, account synchronisation, external calendar connections, scheduled/background reminders, recurring tasks and automatic rescheduling. The in-app past-unfinished notice (FR-17–18), manual start/end times and internet publication are included. Quiz and study-buddy functions are outside this product.
 
-**Calendar planning:** Category behaviour is implemented. The past-unfinished review rules are settled in FR-17–18 and Epic 1; implementation and acceptance remain. Matthew and the developer must reconcile older UX/story descriptions with this revision when preparing that work.
+**Calendar planning:** Category behaviour is implemented. Epic 1 / FR-17–18 is implemented and locally accepted as of 23 November 2026; see [acceptance evidence](../../../implementation-artifacts/epic-1-acceptance.md). Calendar-wide user acceptance remains separate work.
 
 **Ideas for later consideration — not approved requirements:** Week view and week numbers; recurring tasks; search; task copying; drag-to-reschedule with undo; multiple-category selection; export/import backup; and advance reminders. These came from brainstorming inspired by Google Calendar. Matthew selects any additions before they become scoped stories or alter the calendar acceptance boundary. They are not promised by this PRD. AI retains Epic 6 and follows calendar acceptance.
 
@@ -109,11 +109,13 @@ The agreed scope excludes task sharing, team administration, account synchronisa
 
 **Verification evidence:** The 18 October work recorded 24 passing model/appearance/holiday unit tests and browser checks for core task flows and holidays. These are historical recorded results, not a new full test run for this document revision. On 31 October the published address returned HTTP 200 with the expected app, and Matthew confirmed task creation and persistence after refreshing the published page. Published editing and a full production acceptance run are not yet verified. No completed two-user trial or ten-task acceptance report is claimed.
 
-**Remaining Stage 1 work:** Implement the separate past-unfinished review and refresh rules (FR-7, FR-17–18), then complete the ten-task acceptance run, two external user trials, published-site checks and final usability, reliability and assessor-startup checks. Maintain testable stories for this work and link results to requirements; do not recreate delivered category/appearance/holiday features.
+**Remaining Stage 1 work (updated 23 November):** Complete the ten-task acceptance run, two external user trials, published-site checks and final usability, reliability and assessor-startup checks. Epic 1 is complete locally. Maintain testable stories for remaining work and link results to requirements; do not recreate delivered category/appearance/holiday features.
 
 **Stage 2:** Not implemented. Detailed planning and implementation follow calendar completion. No AI service, evaluation result or test mode is claimed as delivered.
 
 **Change record:**
+
+- **23 November 2026:** Closed Epic 1 locally with requirement-to-test evidence, including midnight/inactivity refresh, cross-tab draft protection and per-task actions. No new requirements, production deployment or external user acceptance claimed.
 
 - **13 October 2026:** Retained FR-1–13, added FR-14 for recoverable cleanup, settled time rules and recorded calendar-first sequencing.
 - **2 November 2026:** Superseded the local-only publication restriction after the course enabled Vercel and the app was published. Expanded FR-8 to reflect approved category editing; added FR-15–16 for appearance and holidays and FR-17–18 for the previously approved past-unfinished workflow. Corrected delivered/pending status against the code, separated historical automated checks from user and production acceptance, and retained brainstormed extensions as unapproved ideas. AI remains deferred. No application code changed in this revision.

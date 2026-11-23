@@ -2,7 +2,7 @@
 title: Smart To-Do — detailed calendar stories
 status: draft
 created: 2026-10-13
-updated: 2026-10-18
+updated: 2026-11-23
 stepsCompleted: [step-01-validate-prerequisites, step-02-design-epics]
 currentStep: step-03-create-stories
 inputDocuments:
@@ -19,7 +19,9 @@ inputDocuments:
 
 ## Overview
 
-This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are drafts; Epics 2–5 still need detailed criteria. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
+**Current delivery status — 23 November 2026:** Epic 1 and Stories 1.1–1.4 are complete and locally accepted. See [acceptance evidence](../implementation-artifacts/epic-1-acceptance.md). Older planning and increment entries below describe their state at the time. The overall detailed-story workflow and calendar-wide user acceptance remain incomplete.
+
+This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are locally accepted; Epics 2–5 still need their detailed planning records reconciled with delivered increments. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
 
 Source precedence: the October PRD, its technical addendum, implementation records and subsequent user-approved overview supersede historical proposals in the September technical/UX drafts. The technical plan is not a finalized architecture: Vite scaffolding and unsettled time rules are obsolete proposals, not new work to recreate. New notice, category-editing, appearance and holiday requirements must be reconciled with PRD/UX before their implementation.
 
@@ -114,7 +116,7 @@ As a calendar user,
 I want an in-app count of earlier unfinished tasks,
 So that I remember to review work I have not completed.
 
-**Status:** Draft. Can deliver a plain count independently; the review-list link is introduced in 1.2 so this story has no dependency on a future story.
+**Status:** Done — locally accepted 23 November 2026; see acceptance evidence above.
 
 **Acceptance Criteria:**
 
@@ -132,7 +134,7 @@ As a calendar user,
 I want to open the tasks behind the notice,
 So that I can see which tasks need a decision.
 
-**Status:** Draft. Depends on 1.1. Near-full-screen overlay, dismissal rules and showing all qualifying tasks together are confirmed.
+**Status:** Done — locally accepted 23 November 2026; see acceptance evidence above.
 
 **Acceptance Criteria:**
 
@@ -156,7 +158,7 @@ As a calendar user,
 I want to change the date or complete an earlier task,
 So that the overview reflects my current plans.
 
-**Status:** Implemented and locally verified 23 November 2026. Reuses the existing editor/completion behavior. Full Epic 1 acceptance remains pending.
+**Status:** Done — locally accepted 23 November 2026; see acceptance evidence above.
 
 **Acceptance Criteria:**
 
@@ -175,7 +177,7 @@ As a calendar user,
 I want untreated tasks to remain visible and the notice to follow saved changes,
 So that tasks do not disappear simply because I reviewed them.
 
-**Status:** Draft. Depends on 1.3.
+**Status:** Done — locally accepted 23 November 2026; see acceptance evidence above.
 
 **Acceptance Criteria:**
 

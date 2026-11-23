@@ -698,7 +698,12 @@ document.querySelector('#tidy').addEventListener('click', async () => {
 window.addEventListener('beforeunload', event => { if (dirty || categoryDirty || categoryEdits.size) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('storage', event => {
   if (event.key !== storageKey && event.key !== null) return;
-  if (saving || document.querySelector('#editor')) { announce('Oppgavene er endret i en annen fane. Oversikten oppdateres når du lagrer eller laster siden på nytt.'); refreshPastOverview(); return; }
+  if (saving || document.querySelector('#editor')) {
+    const notice='Oppgavene er endret i en annen fane. Utkastet ditt er beholdt. Nyere endringer blir ikke overskrevet når du lagrer.';
+    announce(notice);
+    if (pastEditorOpen()) document.querySelector('#past-status').textContent=notice;
+    refreshPastOverview(); return;
+  }
   load(); render();
 });
 load(); render();

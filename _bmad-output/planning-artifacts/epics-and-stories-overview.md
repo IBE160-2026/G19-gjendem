@@ -13,6 +13,8 @@ Complete and test the calendar (Epics 1–5) before selecting or implementing th
 
 ## Epic 1 — Review past unfinished tasks
 
+**Status — 23 November 2026:** Stories 1.1–1.4 complete and locally accepted. See [acceptance evidence](../implementation-artifacts/epic-1-acceptance.md). Calendar-wide acceptance and external user trials in Epic 5 remain pending.
+
 - **1.1 Opening notice:** When the calendar opens, show a notice with the count of unfinished tasks dated before today, if any exist. This is an in-app notice, not an operating-system notification or background reminder. Today's tasks and undated tasks do not trigger it.
 - **1.2 Review window:** Open a large in-app overlay covering nearly the whole screen, showing all relevant tasks together with title, date and category, ordered by task date with the oldest first, with scrolling when necessary. Include "Lagre som utført", "Endre" and an upper-left close cross. Outside clicks and Escape do not dismiss it.
 - **1.3 Act on a task:** Let the user change its date or mark it complete. "Endre" opens editing inside the same review window. After saving, return to the updated list while qualifying tasks remain; close only when none remain. Cancelling leaves saved task data unchanged.
