@@ -126,6 +126,7 @@ function render() {
   refreshPastOverview();
 }
 const pastDialog = document.querySelector('#past-dialog');
+const pastEditorOpen = () => Boolean(document.querySelector('#past-editor #editor'));
 let pastSignature = '';
 let pastGlobalError = '';
 function refreshPastOverview() {
@@ -142,19 +143,44 @@ function refreshPastOverview() {
     const countText = `${pending.length} ${pending.length === 1 ? 'uferdig oppgave' : 'uferdige oppgaver'} fra før i dag`;
     const count = document.querySelector('#past-count');
     if (count.textContent !== countText) count.textContent = countText;
+    document.querySelector('#past-heading').textContent = `Tidligere uferdige oppgaver (${pending.length})`;
     const signature = JSON.stringify([pending,names]);
     if (signature !== pastSignature) {
+      const active = list.contains(document.activeElement) ? document.activeElement : null;
+      const focusedTask = active?.closest('[data-past-id]')?.dataset.pastId;
+      const focusedAction = active?.dataset.action;
       list.replaceChildren();
       for (const task of pending) {
         const item = element('li', undefined, 'past-task');
+        item.dataset.pastId=task.id;
         const category = names.find(c=>c.id===task.category);
         item.style.setProperty('--stripe',category.color);
         item.append(element('h3',task.title),element('p',`${fullDate(task.date)}${task.start ? ` · ${task.start}–${task.end}` : ''}`),element('p',category.name));
+        const actions = element('div',undefined,'actions');
+        const complete = element('button','Lagre som utført','primary');
+        complete.type='button'; complete.setAttribute('aria-label',`Lagre som utført: ${task.title}`);
+        complete.dataset.action='complete';
+        complete.addEventListener('click',()=>completePastTask(task,complete));
+        const edit = element('button','Endre'); edit.type='button';
+        edit.setAttribute('aria-label',`Endre: ${task.title}`);
+        edit.dataset.action='edit';
+        edit.addEventListener('click',()=>{
+          if (saving) return;
+          load();
+          if (blocked) { document.querySelector('#past-action-error').textContent='Kunne ikke lese oppgavene. Ingen data er endret.'; return; }
+          openEditor(task.date,null,task,'',false,true);
+        });
+        actions.append(complete,edit);item.append(actions);
         list.append(item);
       }
       pastSignature = signature;
+      if (active && pastDialog.open && !pastEditorOpen()) {
+        const item=[...list.children].find(node=>node.dataset.pastId===focusedTask);
+        const target=[...(item?.querySelectorAll('button') ?? [])].find(node=>node.dataset.action===focusedAction);
+        if(target)target.focus();else focusPastList();
+      }
     }
-    if (!pending.length && pastDialog.open) pastDialog.close();
+    if (!pending.length && pastDialog.open && !pastEditorOpen()) pastDialog.close();
     return pending.length > 0;
   } catch {
     notice.hidden = true;
@@ -168,14 +194,42 @@ function refreshPastOverview() {
   }
 }
 document.querySelector('#past-open').addEventListener('click',()=>{
+  document.querySelector('#past-action-error').textContent='';
+  document.querySelector('#past-status').textContent='';
   if (refreshPastOverview()) pastDialog.showModal();
 });
-document.querySelector('#past-close').addEventListener('click',()=>pastDialog.close());
+document.querySelector('#past-close').addEventListener('click',()=>{
+  if (saving || (pastEditorOpen() && !canLeave())) return;
+  if (pastEditorOpen()) finishPastEditor();
+  if (pastDialog.open) pastDialog.close();
+});
 pastDialog.addEventListener('cancel',event=>event.preventDefault());
 pastDialog.addEventListener('close',()=>{
   const target = document.querySelector('#past-notice').hidden ? document.querySelector('#today') : document.querySelector('#past-open');
   target.focus();
 });
+function focusPastList() {
+  if (pastDialog.open) (document.querySelector('#past-list button') ?? document.querySelector('#past-close')).focus();
+}
+function finishPastEditor(status='') {
+  document.querySelector('#past-editor').replaceChildren();
+  document.querySelector('#past-list').hidden=false;
+  dirty=false;editorSnapshot=null;
+  load();render();
+  document.querySelector('#past-status').textContent=status;
+  if(status) announce(status);
+  focusPastList();
+}
+async function completePastTask(task,button) {
+  const error=document.querySelector('#past-action-error');error.textContent='';
+  try {
+    if (!await persist(()=>changeTask(localStorage,task.id,{completed:true},task))) return;
+    if (editorSnapshot?.id===task.id) editorSnapshot.completed=true;
+    redrawPreservingEditor();
+    const text=`«${task.title}» er lagret som utført.`;
+    document.querySelector('#past-status').textContent=text;announce(text);focusPastList();
+  } catch(failure) { error.textContent=writeError(failure); if(button.isConnected)button.focus();else focusPastList(); }
+}
 function paintCategory(node, id, previewColor) {
   const color = previewColor || categoryList.find(c=>c.id===id)?.color || '#557799';
   node.style.setProperty('--stripe', color);
@@ -414,18 +468,24 @@ function timeField(caption, name, initial) {
   toggle.addEventListener('click',open);
   return {wrapper,input};
 }
-function openEditor(date, row = null, existing = null, startPrefill = '', fromCompleted = false) {
+function openEditor(date, row = null, existing = null, startPrefill = '', fromCompleted = false, fromPast = false) {
   if (!canLeave()) return;
   document.querySelector('#editor')?.remove();
   if (fromCompleted) { completedOpen = false; drawCompleted(); }
-  if (date && date.slice(0,7) !== dateKey(shown).slice(0,7)) {
+  if (!fromPast && date && date.slice(0,7) !== dateKey(shown).slice(0,7)) {
     shown = new Date(`${date}T12:00:00`); expandedDate = null; render();
   }
-  expandedDate = date || null; drawDay();
-  if (!date) { undatedOpen = true; drawUndated(); }
+  if (!fromPast) {
+    expandedDate = date || null; drawDay();
+    if (!date) { undatedOpen = true; drawUndated(); }
+  } else {
+    document.querySelector('#past-list').hidden=true;
+    document.querySelector('#past-action-error').textContent='';
+    document.querySelector('#past-status').textContent='';
+  }
   dirty = false;
   const panel = element('section', undefined, 'editor'); panel.id = 'editor';
-  panel.dataset.host = date ? 'day-editor' : 'loose-editor';
+  panel.dataset.host = fromPast ? 'past-editor' : date ? 'day-editor' : 'loose-editor';
   // Snapshot prevents an old editor from overwriting a newer value from another tab.
   const original = existing ? structuredClone(existing) : null;
   editorSnapshot = original;
@@ -461,9 +521,9 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
   const save = element('button', 'Lagre oppgave', 'primary'); save.type = 'submit';
   const cancel = element('button', 'Avbryt'); cancel.type = 'button';
   const focusOrigin = () => (calendar.querySelector(`[data-date="${date}"] .add`) ?? document.querySelector('#undated-toggle')).focus();
-  cancel.addEventListener('click', () => { if (canLeave()) { dirty = false; expandedDate = null; load(); render(); focusOrigin(); } });
+  cancel.addEventListener('click', () => { if (canLeave()) { if(fromPast){finishPastEditor();return;} dirty = false; expandedDate = null; load(); render(); focusOrigin(); } });
   actions.append(save, cancel); form.append(titleLabel, descriptionLabel, fields, dateHelp, times, timeHelp, error, actions); panel.append(form);
-  if (existing) {
+  if (existing && !fromPast) {
     const remove = element('button', 'Slett oppgave', 'danger'); remove.type = 'button';
     remove.addEventListener('click', async () => {
       if (saving || !confirm(`Vil du slette «${original.title}»? Oppgaven fjernes permanent.`)) return;
@@ -499,6 +559,7 @@ function openEditor(date, row = null, existing = null, startPrefill = '', fromCo
       if (!await persist(() => original
         ? changeTask(localStorage, task.id, task, original)
         : addTask(localStorage, task))) return;
+      if(fromPast){finishPastEditor(`«${name}» er lagret.`);return;}
       if (task.date) shown = new Date(`${task.date}T12:00:00`); else undatedOpen = true;
       dirty = false; expandedDate = null;
       if (selectedCategory && task.category !== selectedCategory) selectedCategory = task.category;

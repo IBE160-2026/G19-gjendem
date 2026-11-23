@@ -156,7 +156,7 @@ As a calendar user,
 I want to change the date or complete an earlier task,
 So that the overview reflects my current plans.
 
-**Status:** Draft. Depends on 1.2 and reuses existing editor/completion behavior.
+**Status:** Implemented and locally verified 23 November 2026. Reuses the existing editor/completion behavior. Full Epic 1 acceptance remains pending.
 
 **Acceptance Criteria:**
 
@@ -219,3 +219,7 @@ The user subsequently confirmed automatic count refresh across local midnight wi
 ## Epic 1 first increment — 23 November 2026
 
 Stories 1.1 and the read-only portion of 1.2 are implemented: counted notice, user-opened near-full-screen list, oldest task date first, upper-left cross and non-dismissal by Escape/backdrop. Closing preserves tasks and the notice recurs on later visits. The list spans all categories. No completion/edit buttons are claimed delivered in this increment. Basic saved-data refresh uses the existing date/visibility and storage hooks without resetting task drafts. Story 1.3 and full Epic 1 acceptance remain pending. See [increment evidence](../implementation-artifacts/spec-1-1-past-unfinished-overview.md).
+
+## Epic 1 action increment — 23 November 2026
+
+Story 1.3 now adds per-task completion and editing inside the same review window. Successful saves refresh the list; tasks rescheduled to another past date remain, and completed, undated or today/future tasks leave it. The window stays open for remaining tasks and closes when none remain, without deleting completed records. Cancel/discard protection, failed-save drafts, stale-edit protection and keyboard focus were verified in isolated browser checks. See [action evidence](../implementation-artifacts/spec-1-3-past-task-actions.md). Story 1.4 and full Epic 1 acceptance still require their final check; no production deployment is claimed.

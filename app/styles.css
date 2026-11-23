@@ -61,4 +61,6 @@
 .past-task{padding:16px;margin-bottom:12px;border:1px solid #dce1e6;border-left:5px solid var(--stripe);border-radius:8px;overflow-wrap:anywhere}
 .past-task h3{margin:0 0 8px}.past-task p{margin:5px 0;font-size:14px}
 body:has(#past-dialog[open]){overflow:hidden}
+#past-editor .editor{border:1px solid #c7cfd8;border-radius:8px;margin-top:16px}
+#past-editor .editor form{max-width:800px}
 .holiday-flag::before{content:'';position:absolute;left:0.5px;top:3.5px;width:22px;height:16px;background:linear-gradient(to right,transparent 7px,#00205b 7px 9px,transparent 9px),linear-gradient(to bottom,transparent 7px,#00205b 7px 9px,transparent 9px),linear-gradient(to right,transparent 6px,#fff 6px 10px,transparent 10px),linear-gradient(to bottom,#ba0c2f 6px,#fff 6px 10px,#ba0c2f 10px)}

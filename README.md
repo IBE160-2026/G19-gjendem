@@ -43,9 +43,9 @@ No package installation, account or API key is needed to run the current app. If
 
 ## Planned work
 
-The first past-unfinished increment is available: a notice counts incomplete tasks dated before today; "Se uferdige oppgaver" opens a near-full-screen read-only list, oldest dates first, across all categories. The upper-left cross closes it without changing tasks; Escape and backdrop clicks do not dismiss it. It returns on future visits while qualifying tasks remain. Date and cross-tab refresh do not force the window open or discard editor drafts.
+The past-unfinished review is available: a notice counts incomplete tasks dated before today; "Se uferdige oppgaver" opens a near-full-screen list, oldest dates first, across all categories. Each task has "Lagre som utført" and "Endre". Editing uses the task form inside the same window; successful handling returns to the remaining list and the window closes when none remain. Completion preserves the task in Fullført. Cancel preserves saved data, and changed drafts require confirmation before discarding. Failed or stale saves retain the draft. The upper-left cross closes the window; Escape and backdrop clicks do not dismiss it. The notice returns on future visits while qualifying tasks remain. Date and cross-tab refresh do not force the window open or discard editor drafts.
 
-Stage 1 still needs editing/completion inside this review window and the planned acceptance/user trials. Use the existing calendar to edit or complete tasks for now. This increment does not complete Epic 1 or the full FR-17–18 acceptance. Categories, appearance customisation and named Norwegian holidays are available.
+Stage 1 still needs the planned acceptance/user trials and full Epic 1 / FR-17–18 acceptance. Notice, review, editing and completion increments are implemented and tested, but this does not establish complete calendar acceptance. Categories, appearance customisation and named Norwegian holidays are available.
 
 Stage 2 will add AI category suggestions that the user accepts, rejects or changes. **AI is not implemented yet.** Before that stage, we will create epics and stories, select a service, document costs and what data is sent, and keep the API key on the server in an uncommitted `.env` file. No provider or model has been selected. The current app does not read `.env` or call an AI service.
 
@@ -73,6 +73,7 @@ Keep the app server running in one terminal. In a second PowerShell terminal at 
 $env:PLAYWRIGHT_MODULE = 'C:/path/to/test-tools/node_modules/playwright'
 node app/browser-check.mjs
 node app/past-unfinished-check.mjs
+node app/past-actions-check.mjs
 node app/timetable-check.mjs
 node app/sidebar-check.mjs
 node app/time-picker-check.mjs
