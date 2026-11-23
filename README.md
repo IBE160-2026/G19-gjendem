@@ -45,6 +45,8 @@ No package installation, account or API key is needed to run the current app. If
 
 Epic 2 / FR-8 is complete and locally accepted; see the [category acceptance evidence](_bmad-output/implementation-artifacts/epic-2-acceptance.md). Filtering, category creation and rename/recolour were checked together, including completed tasks, saved drafts and the past-review window.
 
+Epic 3 / FR-15 is complete and locally accepted; see the [appearance acceptance evidence](_bmad-output/implementation-artifacts/epic-3-acceptance.md). Both photos, colour/preview/save/cancel/reset behaviour, rendered readability and task/category preservation were checked together.
+
 The past-unfinished review is available: a notice counts incomplete tasks dated before today; "Se uferdige oppgaver" opens a near-full-screen list, oldest dates first, across all categories. Each task has "Lagre som utført" and "Endre". Editing uses the task form inside the same window; successful handling returns to the remaining list and the window closes when none remain. Completion preserves the task in Fullført. Cancel preserves saved data, and changed drafts require confirmation before discarding. Failed or stale saves retain the draft. The upper-left cross closes the window; Escape and backdrop clicks do not dismiss it. The notice returns on future visits while qualifying tasks remain. Date and cross-tab refresh do not force the window open or discard editor drafts.
 
 Epic 1 / FR-17–18 is complete and locally accepted; see the [acceptance evidence](_bmad-output/implementation-artifacts/epic-1-acceptance.md). The notice refreshes across local midnight and return from inactivity without interrupting drafts. Cross-tab changes are explained inside an active review editor. Stage 1 still needs calendar-wide acceptance/user trials and published-site checks. Categories, appearance customisation and named Norwegian holidays are available.
@@ -88,6 +90,7 @@ node app/category-edit-check.mjs
 node app/category-acceptance-check.mjs
 node app/appearance-check.mjs
 node app/grid-image-check.mjs
+node app/appearance-acceptance-check.mjs
 node app/holidays-check.mjs
 ```
 

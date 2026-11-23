@@ -22,7 +22,9 @@ try{
  await open();await page.locator('#appearance-reset').click();await page.locator('#appearance-cancel').click();assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),saved);
  await open();await page.locator('#appearance-days').fill('#000000');
  await page.evaluate(()=>{window.realWrite=Storage.prototype.setItem;Storage.prototype.setItem=()=>{throw Error('quota');};});await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'ikke lagret'}).waitFor();
- assert.equal(await page.locator('#appearance-days').inputValue(),'#000000');await page.evaluate(()=>Storage.prototype.setItem=window.realWrite);
+ assert.equal(await page.locator('#appearance-days').inputValue(),'#000000');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),saved);
+ await page.evaluate(()=>Storage.prototype.setItem=window.realWrite);
  // Generate a local fixture using browser canvas; no remote images or personal files.
  const fixture=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=2400;c.height=1200;const x=c.getContext('2d');x.fillStyle='#354e89';x.fillRect(0,0,c.width,c.height);return c.toDataURL('image/png').split(',')[1];});
  await page.locator('#appearance-image').setInputFiles({name:'test.png',mimeType:'image/png',buffer:Buffer.from(fixture,'base64')});
@@ -32,7 +34,14 @@ try{
  await open();await page.locator('#appearance-image').setInputFiles({name:'invalid.png',mimeType:'image/png',buffer:Buffer.from('not image')});await page.locator('#appearance-image-error').filter({hasText:'Kunne ikke lese'}).waitFor();
  assert.match(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),/data:image\/jpeg/);
  const other=await context.newPage();await other.goto('http://localhost:5173');await other.locator('#appearance-toggle').click();await other.locator('[data-theme=warm]').click();await other.locator('#appearance-save').click();await other.locator('#appearance-status').filter({hasText:'er lagret'}).waitFor();
- await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'annen fane'}).waitFor();await page.locator('#appearance-cancel').click();
+ const latestSaved=await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1'));
+ const draftDays=await page.locator('#appearance-days').inputValue();
+ const draftImage=await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage);
+ await page.locator('#appearance-save').click();await page.locator('#appearance-error').filter({hasText:'annen fane'}).waitFor();
+ assert.equal(await page.locator('#appearance-days').inputValue(),draftDays);
+ assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),draftImage);
+ assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.appearance.v1')),latestSaved);
+ await page.locator('#appearance-cancel').click();
  await open();await page.locator('#appearance-reset').click();await save();await page.reload();assert.equal(await page.locator('html').evaluate(el=>getComputedStyle(el).backgroundImage),'none');
  assert.equal(await page.evaluate(()=>localStorage.getItem('smart-todo.v1')),stored);
  // A late image decode must not undo Cancel.

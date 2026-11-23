@@ -115,6 +115,8 @@ The agreed scope excludes task sharing, team administration, account synchronisa
 
 **Change record:**
 
+- **23 November 2026 — appearance:** Epic 3 / FR-15 locally accepted with [combined evidence](../../../implementation-artifacts/epic-3-acceptance.md). Consolidated the delivered independent surrounding/grid photos, reset and preservation rules in Stories 3.1–3.4. No new requirements or production/user-trial acceptance claimed.
+
 - **23 November 2026 — categories:** Epic 2 / FR-8 locally accepted with [combined test evidence](../../../implementation-artifacts/epic-2-acceptance.md). Consolidated Stories 2.1–2.3 and documented the existing all-category exception for the past review. No new category requirements or production/user-trial acceptance claimed.
 
 - **23 November 2026:** Closed Epic 1 locally with requirement-to-test evidence, including midnight/inactivity refresh, cross-tab draft protection and per-task actions. No new requirements, production deployment or external user acceptance claimed.

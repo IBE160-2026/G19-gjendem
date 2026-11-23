@@ -34,12 +34,14 @@ Category identity is stable across rename/recolour; the original Ellers stays th
 
 ## Epic 3 — Customise calendar appearance
 
+**Status — 23 November 2026:** Stories 3.1–3.4 and the later approved continuous calendar-grid photo are complete and locally accepted. See [test evidence](../implementation-artifacts/epic-3-acceptance.md) and the detailed criteria in epics.md.
+
 - **3.1 Surrounding background:** Choose a background colour or a personal image around the calendar.
 - **3.2 Calendar colour:** Change the background colour of the calendar and day cells.
 - **3.3 Retain preferences:** Remember appearance choices when the calendar is opened again.
 - **3.4 Reset appearance:** Restore the standard appearance without deleting tasks.
 
-Task category colours, red conflict cues and text must remain readable. Image handling, storage limits and the precise reset scope are decisions for the detailed stories.
+Task category colours, red conflict cues and text remain readable. Surrounding and grid photos are independent, use cover cropping, and are processed locally with the documented image limits. Reset removes both photos and restores appearance defaults only; Save is required to retain it. Tasks, categories and their drafts remain unchanged.
 
 ## Epic 4 — See Norwegian public holidays
 

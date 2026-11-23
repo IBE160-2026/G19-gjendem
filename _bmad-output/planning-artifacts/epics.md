@@ -21,7 +21,7 @@ inputDocuments:
 
 **Current delivery status — 23 November 2026:** Epic 1 and Stories 1.1–1.4 are complete and locally accepted. See [acceptance evidence](../implementation-artifacts/epic-1-acceptance.md). Older planning and increment entries below describe their state at the time. The overall detailed-story workflow and calendar-wide user acceptance remain incomplete.
 
-This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are locally accepted; Epics 3–5 still need their detailed planning records reconciled with delivered increments. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
+This draft develops the [approved six-epic overview](epics-and-stories-overview.md) into testable stories, starting with Epic 1. The user approved the overview and requested the next planning task; its grouping is retained rather than requiring another approval of the same scope. This is not a completed workflow or an implementation instruction for all epics. Epic 1 criteria below are locally accepted; Epics 4–5 still need their detailed planning records reconciled with delivered increments. Epic 6 remains deferred until calendar acceptance, as explicitly requested.
 
 Source precedence: the October PRD, its technical addendum, implementation records and subsequent user-approved overview supersede historical proposals in the September technical/UX drafts. The technical plan is not a finalized architecture: Vite scaffolding and unsettled time rules are obsolete proposals, not new work to recreate. New notice, category-editing, appearance and holiday requirements must be reconciled with PRD/UX before their implementation.
 
@@ -222,9 +222,37 @@ These refreshes never create operating-system/background notifications. Display 
 - Given renamed Ellers, when adding a task, then the same category remains the default under its new display name.
 - Given a duplicate, failed write or stale edit, when saving, then reject it with feedback and retain the draft. Existing task drafts also survive category edits.
 
-## Epics 3–5: Remaining planning reconciliation
+## Epic 3: Customise calendar appearance
 
-The approved stories remain in the overview. Reconcile delivered appearance and holiday decisions with their implementation records before final acceptance; do not rebuild them from historical open questions. Calendar-wide acceptance and external trials still belong to Epic 5.
+**Status:** Stories 3.1–3.4 and the approved continuous-grid-photo extension are delivered and locally accepted 23 November 2026. See [acceptance evidence](../implementation-artifacts/epic-3-acceptance.md). These criteria consolidate existing behaviour, not new features.
+
+### Story 3.1: Surrounding background
+
+- Given a chosen background colour or valid local JPG/PNG/WebP photo, when selected, then preview it around the calendar without saving; a photo uses centred cover cropping.
+- Given surrounding and grid photos, when either is removed or replaced, then the other remains independently configurable. The grid photo covers the whole month once, rather than repeating in each cell.
+- Given an invalid image or delayed decoding, when it fails or the choice is cancelled/reset/removed, then explain the failure and never revive a cancelled image or overwrite a newer choice.
+
+### Story 3.2: Calendar colour and grid photo
+
+- Given calendar/day colours, when changed, then preview them immediately while dates, category/task text, today, completion and conflicts remain distinguishable.
+- Given a grid photo, when displayed or removed, then opaque date/task surfaces retain readability and removal reveals the chosen day colour. Navigation and expanded-day use preserve the appearance.
+- Given task/category data or drafts, when appearance changes, then their values, associations and category colours remain unchanged.
+
+### Story 3.3: Retain preferences
+
+- Given a preview, when Save succeeds, then the choices survive reopening in the same browser/profile/address; Cancel restores the latest saved appearance.
+- Given quota failure or a newer save in another tab, when saving, then retain the draft, show feedback and do not overwrite the saved appearance or task/category data.
+- Given either photo is processing, when the user attempts Save, then saving remains unavailable until image processing settles. Competing task and appearance saves must leave their controls usable.
+
+### Story 3.4: Reset appearance
+
+- Given customised colours and two photos, when Reset is chosen, then preview defaults and removal of both photos without changing saved preferences until Save.
+- Given reset preview, when Cancel is chosen, then restore saved appearance; when Save succeeds and the app reloads, then retain defaults.
+- Given saved tasks/categories and their open drafts, when appearance is reset and saved, then preserve them intact.
+
+## Epics 4–5: Remaining planning reconciliation
+
+The approved stories remain in the overview. Reconcile delivered holiday decisions with their implementation records before final acceptance; do not rebuild them from historical open questions. Calendar-wide acceptance and external trials still belong to Epic 5.
 
 ## Epic 6: Deferred
 

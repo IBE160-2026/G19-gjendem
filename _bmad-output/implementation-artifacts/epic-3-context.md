@@ -4,7 +4,7 @@
 
 ## Goal
 
-Let the user personalise the calendar's surroundings and calendar/day surfaces, retain those choices between visits, and return to the standard appearance without changing tasks or categories. The calendar must remain a clear overview of personal work, family and study tasks. All four appearance stories are approved together in the current session, including cover-cropped personal images and immediate preview with explicit Save/Cancel. This session approval supersedes the older planning notes that leave those interaction and reset choices open; image limits and storage details still require implementation decisions rather than invented product requirements.
+Let the user personalise the surroundings, calendar and day surfaces while retaining a readable task overview, save those choices between visits, and restore the standard appearance without changing tasks or categories. The four approved stories and the subsequent continuous calendar-grid photo increment are already delivered. Combined local acceptance is complete as of 23 November 2026; epic-3-acceptance.md records fresh results for the delivered scope. No broader calendar/user acceptance is claimed.
 
 ## Stories
 
@@ -15,34 +15,33 @@ Let the user personalise the calendar's surroundings and calendar/day surfaces, 
 
 ## Requirements & Constraints
 
-- Offer a chosen colour or personal image around the calendar, plus control of calendar and day-cell background colours. Personal images fill their surrounding area using cover cropping; they must not obscure the calendar's content or controls.
-- Preview appearance changes immediately while editing. Persist the selected appearance only through explicit Save. Cancel restores the previously saved appearance. Reset restores the standard appearance without altering tasks, category definitions, category colours or task-category associations.
-- Reopening the calendar in the same browser profile and origin restores successfully saved appearance preferences. The local app has no account, cloud backup or automatic cross-device synchronisation; do not imply otherwise.
-- Appearance changes must preserve task visibility and existing navigation, month/day expansion, timetable, sidebars, filters and editor behaviour. They must not move tasks, alter completion state, hide information or discard an unrelated unsaved task draft.
-- Retain named category colours, red conflict titles with a textual cue, checked/struck-through completion, and distinct today and selected-day indications. Appearance settings do not replace category management or redefine task status colours.
-- Normal text, including red conflict text and completed task text, targets at least 4.5:1 contrast. Essential controls and focus boundaries target at least 3:1. Verify actual rendered custom combinations; do not assume a background picker guarantees readability. Today and selection must remain distinguishable.
-- Saving failure must give understandable feedback and keep the editable choices available; it must not claim persistence. Unreadable saved information must not be silently replaced. Define and document supported image formats, size limits and image-storage handling before accepting the feature; no specific limits are established by the planning documents.
-- Controls, validation and feedback use Norwegian Bokmål. Project documentation remains in English. No external AI request, credential, new account system or publication is part of this epic.
+- Support a surrounding colour or personal photo, calendar and day-cell colours, and a separate personal photo behind the whole monthly grid. The grid photo is one continuous cover-cropped image across all week rows, never a repeated image in each cell. The two photos are independently configurable; surrounding photos use centred cover cropping.
+- Changes preview immediately without persistence. Explicit Save commits them; Cancel restores the latest saved appearance. Reset previews the established defaults, including removal of both photos, and requires Save to persist. Removing the grid photo reveals the chosen day colours.
+- Successfully saved choices survive reopening in the same browser profile and local origin. Reset, Save, Cancel and image removal preserve tasks, category definitions, task-category associations and unrelated unsaved task/category drafts.
+- Keep existing month navigation, expanded-day timetable, task editing, sidebars, category filtering and completion/cleanup usable. Appearance must not change task dates, completion, visibility rules or category colours.
+- Preserve readable named categories, red conflict titles with a textual cue, checked/struck-through completion, and distinguishable today and selected-day indicators. Normal text, including conflict and completed text, targets 4.5:1 contrast; essential controls and focus boundaries target 3:1. Acceptance must inspect actual rendered combinations and image backgrounds.
+- Failed image processing keeps the prior valid choice. Failed saves retain editable choices and explain that persistence failed. Invalid stored data must not be silently replaced. A stale save must not overwrite a newer appearance saved in another tab.
+- Use Norwegian Bokmål controls and feedback, English project documentation, and fictional tasks and image fixtures for verification. Photos remain local; no upload, external image URL, account, AI request or credential is part of this epic.
 
 ## Technical Decisions
 
-- Extend the established local-browser application without replacing its architecture or introducing a framework/cloud service merely for appearance settings. The older technical-plan starter proposal is historical, not authorisation to re-scaffold the app.
-- Keep appearance persistence logically separate from task/category mutations so saving or resetting appearance cannot rewrite unrelated records. Choose the concrete schema and storage approach in implementation; the planning documents do not prescribe image encoding or an image database.
-- Follow existing reliability constraints: validate saved data, coordinate competing writes as necessary, reject stale changes instead of silently overwriting newer information, and preserve drafts when an operation fails. Immediate visual preview is temporary and must remain distinguishable from a successful persistent save.
-- Persistence is tied to the supported browser profile and stable local origin/port. Clearing site data can remove locally saved preferences; avoid wording suggesting backup or guaranteed retention beyond that environment.
-- Treat user-provided content safely. User text must remain text, not executable markup. Personal-image handling must preserve the local-only Stage 1 experience.
-- Use the established standard appearance as the reset baseline. Historical design shades are starting values, not grounds to change the current baseline or overwrite subsequently customised categories.
+- Preserve the established local HTML/CSS/JavaScript application and local server. Historical starter/framework proposals do not require re-scaffolding. Appearance acceptance does not introduce cloud storage, backup or cross-device synchronisation.
+- Appearance uses independently versioned local persistence, separate from task/category storage. Appearance operations must never rewrite task records or interfere with task-operation control locking. Coordinate writes and compare the original saved snapshot before committing; reject stale changes while preserving the draft.
+- Preserve compatibility with older saved appearance records that lack the optional grid photo. Missing grid imagery means no grid photo, without losing earlier colour or surrounding-photo preferences.
+- Retain the delivered local-image limits: JPG, PNG or WebP; at most 10 MiB input and 40 megapixels decoded; resize to a maximum dimension of 1600 pixels, flatten and re-encode as JPEG, and cap each saved data URL at 1.5 million characters. Storage quota failure remains possible and must preserve drafts rather than claim success.
+- Independently invalidate asynchronous work for each photo on replacement, removal, reset or Cancel. A late result must not resurrect a discarded photo or overwrite the other photo. Shared Save remains disabled while either image is processing; one successful conversion must not erase the other image's failure feedback.
+- Use the existing standard appearance as the reset baseline. Never derive reset values from historical design shades or reset customised categories. Persistence remains tied to the supported stable local address/port and browser profile.
 
 ## UX & Interaction Patterns
 
-- Preserve the calm, month-first desktop layout, readable system fonts, compact metadata, rounded cards and light dividers. Appearance customisation must remain subordinate to legible tasks and usable navigation.
-- Provide labelled, keyboard-operable controls and visible focus. Preview must let the user judge the calendar while editing; Save and Cancel must make the commit boundary clear. Announce relevant validation, save success and failure without unnecessary focus changes.
-- Keep important controls and information readable over both light and dark photographs and colour choices. Background imagery must not become the only surface behind essential text or erase task/category/status distinctions.
-- Preserve access at supported desktop widths and browser zoom. Do not adopt the old prototype's narrow-screen task hiding or automatic dark theme as new requirements.
+- Retain the calendar-first desktop arrangement with management controls below it, the left overview and the expanded-day untimed panel on the right. Keep readable system fonts, compact metadata, rounded cards and light dividers.
+- Keep one coherent appearance editor with labelled keyboard-operable controls, visible focus and clear preview versus saved-state feedback. Save, Cancel, removal and reset must remain understandable and reachable.
+- Protect date labels, task cards and essential controls from photographs; expanded-day/editor panels stay opaque. Light, dark and strongly coloured backgrounds must not hide errors, focus rings or task status cues.
+- Verify supported desktop widths and browser zoom without losing task or control access. Mobile redesign is separate approved backlog work, not part of this acceptance pass.
 
 ## Cross-Story Dependencies
 
-- Stories 3.1 and 3.2 share one appearance-editing experience; 3.3 persists its saved state and 3.4 restores its standard state. Implement their preview, Save/Cancel and reset behaviour coherently as the approved combined scope.
-- Category customisation belongs to Epic 2. Appearance changes must respect its category colours and preserve task associations, including user-defined categories.
-- Epic 5 verifies the combined calendar, including appearance persistence, reset, accessibility and regression behaviour. Its real-user trials and assessor-startup acceptance remain separate activities; passing automated checks alone does not complete them.
-- AI implementation remains deferred until the calendar is complete and accepted.
+- Stories 3.1 and 3.2 share the editor and image handling; 3.3 commits their combined saved state and 3.4 resets it. The delivered continuous-grid photo uses those same preview, persistence and reset rules and belongs in the combined acceptance scope.
+- Epic 2 category editing remains independent. Custom category names/colours and all task associations must survive every appearance operation; existing task, category and timetable checks provide regression coverage.
+- Historical appearance and grid-photo checks cover cancellation, reload, invalid images, storage failures, concurrent work and visual continuity. Record fresh expected/actual results for final acceptance instead of treating historical passing counts as a new run.
+- Epic 5 still owns calendar-wide acceptance, two external user trials and assessor startup verification. Epic 3 acceptance does not complete those activities or authorise deferred Epic 6 AI work or Epic 7 responsive implementation.
