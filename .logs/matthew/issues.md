@@ -7,7 +7,8 @@
 
 
 
-- [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Implementere FR-17–18 og samordne eldre UX/story-tekst ved oppstart.
+- [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Fullføre FR-17–18: varsel og skrivebeskyttet oversikt er implementert 2026-11-23, og UX/story-status samordnet. Neste er Story 1.3 (fullføring/redigering i vinduet) og samlet akseptanse.
 - [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Fullføre ti-oppgavers akseptansetest og to eksterne brukertester før KI-trinnet.
 
 - [ ] 2026-11-02 [Mobil-epic](997-2026-11-02-19-37-28-mobil-epic.md) — Epic 7 er utsatt: avklar skjermgrenser, nettbrett, testenheter og samordne PRD/UX ved oppstart. Fortsett Epic 1 først.
+
