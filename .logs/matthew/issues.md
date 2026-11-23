@@ -7,8 +7,8 @@
 
 
 
-- [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Fullføre FR-17–18: varsel, oversikt og Story 1.3 (fullføring/redigering i vinduet) er implementert og lokalt testet 2026-11-23. UX/story-status samordnet. Neste er Story 1.4 og samlet akseptanse.
+- [x] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — FR-17–18 og Story 1.1–1.4 ferdig med samlet lokal Epic 1-akseptanse og dokumenterte tester (løst 2026-11-23). Kalenderens samlede brukertester og produksjonskontroller er egne punkter.
 - [ ] 2026-11-02 [PRD-oppdatering](998-2026-11-02-12-00-00-prd-oppdatering.md) — Fullføre ti-oppgavers akseptansetest og to eksterne brukertester før KI-trinnet.
 
-- [ ] 2026-11-02 [Mobil-epic](997-2026-11-02-19-37-28-mobil-epic.md) — Epic 7 er utsatt: avklar skjermgrenser, nettbrett, testenheter og samordne PRD/UX ved oppstart. Fortsett Epic 1 først.
+- [ ] 2026-11-02 [Mobil-epic](997-2026-11-02-19-37-28-mobil-epic.md) — Epic 7 er ikke startet: avklar skjermgrenser, nettbrett, testenheter og samordne PRD/UX ved oppstart. Epic 1 er nå avsluttet lokalt.
 
