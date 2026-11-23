@@ -1,5 +1,7 @@
 # Åpne punkter
 
+- [ ] 2026-11-23 [Utseende sluttkontroll](994-2026-11-23-21-05-46-utseende-sluttkontroll.md) — Ta med nettleserens egen zoom-meny i manuell Epic 5-kontroll. PC-bredder og et 200 prosent tilsvarende visningsområde er testet automatisk.
+
 - [ ] 2026-10-31 [Vercel-publisering](999-2026-10-31-12-19-37-vercel-publisering.md) — Test redigering på publisert side. Oppretting og lagring etter oppdatering er bekreftet av brukeren 2026-10-31.
 - [x] 2026-10-31 [Vercel-publisering](999-2026-10-31-12-19-37-vercel-publisering.md) — GitHub CLI installert og innlogget; tilgang til prosjektet bekreftet (løst 2026-10-31).
 
