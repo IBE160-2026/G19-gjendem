@@ -216,3 +216,6 @@ The user subsequently confirmed automatic count refresh across local midnight wi
 ## Backlog addition — 2 November 2026
 
 [Epic 7 — Adapt the calendar to mobile and larger PC screens](epic-7-responsive-calendar.md) records five approved stories with acceptance criteria from the user discussion. Status: approved backlog, not started. It preserves the desktop layout while adding a mobile month/day experience and extra calendar width on larger PC screens. This addition does not mark the overall detailed-story workflow complete or change the current work order. Resume the pending Epic 1 past-unfinished review (PRD FR-17–18); schedule Epic 7 later and reconcile PRD/UX before its implementation.
+## Epic 1 first increment — 23 November 2026
+
+Stories 1.1 and the read-only portion of 1.2 are implemented: counted notice, user-opened near-full-screen list, oldest task date first, upper-left cross and non-dismissal by Escape/backdrop. Closing preserves tasks and the notice recurs on later visits. The list spans all categories. No completion/edit buttons are claimed delivered in this increment. Basic saved-data refresh uses the existing date/visibility and storage hooks without resetting task drafts. Story 1.3 and full Epic 1 acceptance remain pending. See [increment evidence](../implementation-artifacts/spec-1-1-past-unfinished-overview.md).

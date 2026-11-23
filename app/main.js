@@ -1,5 +1,6 @@
 import {categories, readCategories, addCategory, editCategory, dateKey, validDate, validTimes, conflictingIds, byTime, upcomingGroups, readTasks, addTask, changeTask, archiveCompleted, monthDays, storageKey} from './model.js';
 import {norwegianHolidays, holidayMinYear, holidayMaxYear} from './model.js';
+import {pastUnfinishedTasks} from './model.js';
 
 const calendar = document.querySelector('#calendar');
 const message = document.querySelector('#message');
@@ -122,7 +123,59 @@ function render() {
   drawUpcoming();
   drawCompleted();
   drawUndated();
+  refreshPastOverview();
 }
+const pastDialog = document.querySelector('#past-dialog');
+let pastSignature = '';
+let pastGlobalError = '';
+function refreshPastOverview() {
+  const notice = document.querySelector('#past-notice');
+  const list = document.querySelector('#past-list');
+  const error = document.querySelector('#past-error');
+  try {
+    const pending = pastUnfinishedTasks(readTasks(localStorage));
+    const names = readCategories(localStorage);
+    error.textContent = '';
+    if (pastGlobalError && message.textContent === pastGlobalError) announce('');
+    pastGlobalError = '';
+    notice.hidden = pending.length === 0;
+    const countText = `${pending.length} ${pending.length === 1 ? 'uferdig oppgave' : 'uferdige oppgaver'} fra før i dag`;
+    const count = document.querySelector('#past-count');
+    if (count.textContent !== countText) count.textContent = countText;
+    const signature = JSON.stringify([pending,names]);
+    if (signature !== pastSignature) {
+      list.replaceChildren();
+      for (const task of pending) {
+        const item = element('li', undefined, 'past-task');
+        const category = names.find(c=>c.id===task.category);
+        item.style.setProperty('--stripe',category.color);
+        item.append(element('h3',task.title),element('p',`${fullDate(task.date)}${task.start ? ` · ${task.start}–${task.end}` : ''}`),element('p',category.name));
+        list.append(item);
+      }
+      pastSignature = signature;
+    }
+    if (!pending.length && pastDialog.open) pastDialog.close();
+    return pending.length > 0;
+  } catch {
+    notice.hidden = true;
+    list.replaceChildren(); pastSignature = '';
+    error.textContent = 'Vi kunne ikke lese oppgavene. Ingen data er endret. Lukk oversikten og prøv å laste siden på nytt.';
+    if (!pastDialog.open && !blocked) {
+      pastGlobalError = 'Vi kunne ikke lese oppgavene til oversikten over tidligere uferdige oppgaver. Ingen data er endret. Prøv å laste siden på nytt.';
+      announce(pastGlobalError, true);
+    }
+    return false;
+  }
+}
+document.querySelector('#past-open').addEventListener('click',()=>{
+  if (refreshPastOverview()) pastDialog.showModal();
+});
+document.querySelector('#past-close').addEventListener('click',()=>pastDialog.close());
+pastDialog.addEventListener('cancel',event=>event.preventDefault());
+pastDialog.addEventListener('close',()=>{
+  const target = document.querySelector('#past-notice').hidden ? document.querySelector('#today') : document.querySelector('#past-open');
+  target.focus();
+});
 function paintCategory(node, id, previewColor) {
   const color = previewColor || categoryList.find(c=>c.id===id)?.color || '#557799';
   node.style.setProperty('--stripe', color);
@@ -584,11 +637,12 @@ document.querySelector('#tidy').addEventListener('click', async () => {
 window.addEventListener('beforeunload', event => { if (dirty || categoryDirty || categoryEdits.size) { event.preventDefault(); event.returnValue = ''; } });
 window.addEventListener('storage', event => {
   if (event.key !== storageKey && event.key !== null) return;
-  if (saving || document.querySelector('#editor')) { announce('Oppgavene er endret i en annen fane. Oversikten oppdateres når du lagrer eller laster siden på nytt.'); return; }
+  if (saving || document.querySelector('#editor')) { announce('Oppgavene er endret i en annen fane. Oversikten oppdateres når du lagrer eller laster siden på nytt.'); refreshPastOverview(); return; }
   load(); render();
 });
 load(); render();
 function refreshToday() {
+  if (!saving) refreshPastOverview();
   const today = dateKey(new Date());
   for (const cell of calendar.querySelectorAll('[data-date]')) {
     const current = cell.dataset.date === today;

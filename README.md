@@ -43,7 +43,9 @@ No package installation, account or API key is needed to run the current app. If
 
 ## Planned work
 
-Stage 1 still needs a separate overview of past unfinished tasks and the planned acceptance/user trials. Categories, appearance customisation and named Norwegian holidays are available. Past dated tasks can currently be found by navigating to their calendar month.
+The first past-unfinished increment is available: a notice counts incomplete tasks dated before today; "Se uferdige oppgaver" opens a near-full-screen read-only list, oldest dates first, across all categories. The upper-left cross closes it without changing tasks; Escape and backdrop clicks do not dismiss it. It returns on future visits while qualifying tasks remain. Date and cross-tab refresh do not force the window open or discard editor drafts.
+
+Stage 1 still needs editing/completion inside this review window and the planned acceptance/user trials. Use the existing calendar to edit or complete tasks for now. This increment does not complete Epic 1 or the full FR-17–18 acceptance. Categories, appearance customisation and named Norwegian holidays are available.
 
 Stage 2 will add AI category suggestions that the user accepts, rejects or changes. **AI is not implemented yet.** Before that stage, we will create epics and stories, select a service, document costs and what data is sent, and keep the API key on the server in an uncommitted `.env` file. No provider or model has been selected. The current app does not read `.env` or call an AI service.
 
@@ -57,6 +59,7 @@ From the repository root, run the model tests; these need only Node.js:
 node --test app/model.test.mjs
 node --test app/appearance.test.mjs
 node --test app/holidays.test.mjs
+node --test app/past-unfinished.test.mjs
 ```
 
 They cover date and time validation, overlap rules, weekly grouping, persistence, stale changes, descriptions, undated tasks and recoverable cleanup.
@@ -69,6 +72,7 @@ Keep the app server running in one terminal. In a second PowerShell terminal at 
 # Replace the example with your actual Playwright installation path.
 $env:PLAYWRIGHT_MODULE = 'C:/path/to/test-tools/node_modules/playwright'
 node app/browser-check.mjs
+node app/past-unfinished-check.mjs
 node app/timetable-check.mjs
 node app/sidebar-check.mjs
 node app/time-picker-check.mjs

@@ -37,6 +37,11 @@ export function conflictingIds(tasks) {
 export function byTime(a, b) {
   return (a.start || '99:99').localeCompare(b.start || '99:99') || a.title.localeCompare(b.title, 'nb');
 }
+export function pastUnfinishedTasks(tasks, now = new Date()) {
+  const today = dateKey(now);
+  return tasks.filter(task => task.date && task.date < today && !task.completed)
+    .sort((a,b) => a.date.localeCompare(b.date) || byTime(a,b) || a.id.localeCompare(b.id));
+}
 export function upcomingGroups(tasks, now = new Date()) {
   const today = dateKey(now);
   const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7 - (now.getDay() + 6) % 7);
