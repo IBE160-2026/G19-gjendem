@@ -64,3 +64,27 @@ body:has(#past-dialog[open]){overflow:hidden}
 #past-editor .editor{border:1px solid #c7cfd8;border-radius:8px;margin-top:16px}
 #past-editor .editor form{max-width:800px}
 .holiday-flag::before{content:'';position:absolute;left:0.5px;top:3.5px;width:22px;height:16px;background:linear-gradient(to right,transparent 7px,#00205b 7px 9px,transparent 9px),linear-gradient(to bottom,transparent 7px,#00205b 7px 9px,transparent 9px),linear-gradient(to right,transparent 6px,#fff 6px 10px,transparent 10px),linear-gradient(to bottom,#ba0c2f 6px,#fff 6px 10px,#ba0c2f 10px)}
+
+/* Story 3.5: softer surfaces, same calendar arrangement and colour semantics. */
+button{border-radius:12px}
+.calendar-card,#upcoming{border-radius:26px;border-color:#dce3e9;box-shadow:0 12px 36px rgba(28,49,68,.07)}
+.calendar-scroll{margin:0 12px;border-radius:18px;border:1px solid #e3e8ed}
+.weekdays{border-top:0;border-color:#e3e8ed;background:#f4f7fa;font-weight:600}
+.day{border-color:#e9edf1;border-radius:12px}
+.day.is-today{border-radius:12px}
+.task,.legend span{border-radius:10px}
+.task{box-shadow:0 2px 5px rgba(28,49,68,.04)}
+.day .add{border-radius:50%;border:1px solid #dce3e9}
+.day-number{border-radius:8px}
+.completed-panel,.expanded-day,.editor,.timeline,.past-notice,#past-dialog{border-radius:18px}
+.custom-surround .app-header,.custom-surround footer{border-radius:24px}
+.has-page-image .app-header,.has-page-image footer,.has-page-image #upcoming{background:rgba(250,252,255,.94);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.8)}
+.has-grid-image .day{border-color:rgba(255,255,255,.35)}
+.has-grid-image .day-number{border-radius:8px}
+.period+.period{border-color:#e1e7ec}
+.nature-preset{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:20px 0;padding:16px;border:1px solid #dce3e9;border-radius:18px;background:#fff}
+.nature-preset img{width:240px;max-width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:12px}
+.nature-preset>div{flex:1;min-width:180px}
+.nature-preset h4{font-size:17px;margin:0}
+.light-photo-calendar .calendar-card{background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}
+.nature-preset .day-help{margin:8px 0 12px}

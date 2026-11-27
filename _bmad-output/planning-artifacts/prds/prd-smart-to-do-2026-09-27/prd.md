@@ -123,3 +123,7 @@ The agreed scope excludes task sharing, team administration, account synchronisa
 
 - **13 October 2026:** Retained FR-1–13, added FR-14 for recoverable cleanup, settled time rules and recorded calendar-first sequencing.
 - **2 November 2026:** Superseded the local-only publication restriction after the course enabled Vercel and the app was published. Expanded FR-8 to reflect approved category editing; added FR-15–16 for appearance and holidays and FR-17–18 for the previously approved past-unfinished workflow. Corrected delivered/pending status against the code, separated historical automated checks from user and production acceptance, and retained brainstormed extensions as unapproved ideas. AI remains deferred. No application code changed in this revision.
+
+## FR-15 extension — Story 3.5, 27 November 2026
+
+Approved implementation scope: softer rounded visual surfaces and a bundled optional mountain photo for either existing independent background. Preserve uploaded images, colours, explicit preview/save/cancel/reset and all task/category data. Stories 3.1–3.4 retain their earlier acceptance; Story 3.5 requires fresh verification and user visual acceptance. See ../../story-3-5-soft-nature-appearance.md.

@@ -45,6 +45,8 @@ if(typeof document!=='undefined') {
     style.setProperty('--page-bg',value.background);style.setProperty('--page-image',value.image?`url("${value.image}")`:'none');
     style.setProperty('--grid-image',value.gridImage?`url("${value.gridImage}")`:'none');
     document.body.classList.toggle('has-grid-image',Boolean(value.gridImage));
+    document.body.classList.toggle('has-page-image',Boolean(value.image));
+    document.body.classList.toggle('light-photo-calendar',Boolean(value.image)&&value.calendar==='#ffffff');
     for(const key of ['calendar','days']){style.setProperty(`--${key}-bg`,value[key]);style.setProperty(`--${key}-text`,textColour(value[key]));}
     style.setProperty('--today-bg',value.days==='#ffffff'?'#f8fbff':value.days);
     style.setProperty('--empty-bg',value.days==='#ffffff'?'#fafbfc':value.days);
@@ -73,12 +75,18 @@ if(typeof document!=='undefined') {
   });
   for(const item of images) {
     const file=document.getElementById(item.input),key=item.key;
-    file.addEventListener('change',async()=>{
-      const selected=file.files[0];if(!selected)return;const ticket=++sequences[key];pending.add(key);imageErrors[key]='';sync();status.textContent='Klargjør bildet …';error.textContent='';
-      try {const image=await imageData(selected);if(ticket!==sequences[key])return;draft[key]=image;changed();}
+    async function selectImage(source) {
+      const ticket=++sequences[key];pending.add(key);imageErrors[key]='';sync();status.textContent='Klargjør bildet …';error.textContent='';
+      try {const selected=await source();if(ticket!==sequences[key])return;const image=await imageData(selected);if(ticket!==sequences[key])return;draft[key]=image;changed();}
       catch(failure){if(ticket===sequences[key]){imageErrors[key]=failure.message.startsWith('Velg ')||failure.message.startsWith('Bildet ')?failure.message:'Kunne ikke lese bildet. Prøv et annet JPG-, PNG- eller WebP-bilde.';status.textContent='Bildet ble ikke endret.';}}
       finally {if(ticket===sequences[key]){pending.delete(key);file.value='';sync();}}
-    });
+    }
+    file.addEventListener('change',()=>{const selected=file.files[0];if(selected)selectImage(()=>selected);});
+    panel.querySelector(`[data-landscape="${key}"]`).addEventListener('click',()=>selectImage(async()=>{
+      const response=await fetch('assets/mountains-lake.jpg');
+      if(!response.ok)throw Error('Bildet kunne ikke lastes. Prøv igjen.');
+      return response.blob();
+    }));
     document.getElementById(item.remove).addEventListener('click',()=>{invalidate(key);draft[key]='';changed();});
   }
   document.querySelector('#appearance-reset').addEventListener('click',()=>{invalidate();draft={...defaultAppearance};changed();});

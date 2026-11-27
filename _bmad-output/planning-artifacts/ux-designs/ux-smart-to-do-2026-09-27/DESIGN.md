@@ -143,3 +143,7 @@ Task cards use `{rounded.sm}`; buttons and inputs use `{rounded.md}`; calendar b
 - Preserve visible completion and conflict states together where applicable.
 - Do not treat the prototype's fixed date, sample tasks, hours or responsive behavior as production requirements.
 - Do not hide undated or earlier tasks merely because they are outside the pictured month.
+
+## Story 3.5 visual extension — 27 November 2026
+
+Use the approved mountain mockup as visual direction: rounded panels, controls and task cards, quieter grid separators, and lightly frosted surrounding surfaces. Preserve the desktop arrangement and category/status cues. The bundled mountain photo is optional for either background; existing images/colours are retained and reset defaults do not change. Opaque content surfaces protect text contrast. User visual acceptance follows implementation.

@@ -40,7 +40,7 @@ Category identity is stable across rename/recolour; the original Ellers stays th
 - **3.2 Calendar colour:** Change the background colour of the calendar and day cells.
 - **3.3 Retain preferences:** Remember appearance choices when the calendar is opened again.
 - **3.4 Reset appearance:** Restore the standard appearance without deleting tasks.
-- **3.5 Softer calendar with nature background:** Rounded surfaces, quieter grid lines and a selectable mountain/lake background, preserving existing customisation. [Detailed story](story-3-5-soft-nature-appearance.md). Approved 27 November 2026; not implemented. Epic 3 therefore has new pending work beyond the accepted 3.1–3.4 scope.
+- **3.5 Softer calendar with nature background:** Rounded surfaces, quieter grid lines and a selectable mountain/lake background, preserving existing customisation. [Detailed story](story-3-5-soft-nature-appearance.md). Implemented and locally tested 27 November 2026; user visual acceptance remains pending. See [implementation evidence](../implementation-artifacts/spec-3-5-soft-nature-appearance.md).
 
 Task category colours, red conflict cues and text remain readable. Surrounding and grid photos are independent, use cover cropping, and are processed locally with the documented image limits. Reset removes both photos and restores appearance defaults only; Save is required to retain it. Tasks, categories and their drafts remain unchanged.
 

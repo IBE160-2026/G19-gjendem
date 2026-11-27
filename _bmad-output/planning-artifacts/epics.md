@@ -252,7 +252,7 @@ These refreshes never create operating-system/background notifications. Display 
 
 ### Story 3.5: Mykere kalender med naturbakgrunn
 
-**Status — 27 November 2026:** Approved backlog, not implemented. Stories 3.1–3.4 retain their existing acceptance; Epic 3 now has this additional pending story.
+**Status — 27 November 2026:** Implemented and locally tested; user visual acceptance remains pending. Stories 3.1–3.4 retain their existing acceptance.
 
 As a calendar user, I want a softer appearance with an optional mountain landscape while retaining my own images and colours, so that the calendar feels personal and remains easy to read.
 

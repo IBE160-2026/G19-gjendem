@@ -5,14 +5,16 @@ const files = new Map([
   ['/', ['index.html', 'text/html']], ['/index.html', ['index.html', 'text/html']],
   ['/main.js', ['main.js', 'text/javascript']], ['/model.js', ['model.js', 'text/javascript']],
   ['/styles.css', ['styles.css', 'text/css']],
-  ['/appearance.js', ['appearance.js', 'text/javascript']]
+  ['/appearance.js', ['appearance.js', 'text/javascript']],
+  ['/assets/mountains-lake.jpg', ['assets/mountains-lake.jpg', 'image/jpeg']]
 ]);
 const server = http.createServer(async (request, response) => {
   const entry = files.get((request.url || '/').split('?')[0]);
   if (!entry || !['GET', 'HEAD'].includes(request.method)) { response.writeHead(404); response.end('Not found'); return; }
   try {
     const data = await readFile(new URL(entry[0], import.meta.url));
-    response.writeHead(200, {'Content-Type': `${entry[1]}; charset=utf-8`, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'});
+    const contentType=entry[1].startsWith('text/')?`${entry[1]}; charset=utf-8`:entry[1];
+    response.writeHead(200, {'Content-Type': contentType, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'});
     response.end(request.method === 'HEAD' ? undefined : data);
   } catch { response.writeHead(500); response.end('Unable to load application'); }
 });

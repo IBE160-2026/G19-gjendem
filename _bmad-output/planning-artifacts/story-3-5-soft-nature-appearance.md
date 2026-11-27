@@ -1,7 +1,7 @@
 # Story 3.5 — Mykere kalender med naturbakgrunn
 
 **Epic:** 3 — Tilpass kalenderens utseende  
-**Status:** Godkjent backlog, ikke implementert  
+**Status:** Implementert og testet lokalt 27. november 2026; avventer brukerens visuelle godkjenning
 **Avklart med brukeren:** 27. november 2026  
 **Forutsetning:** Bygger videre på godkjente Stories 3.1–3.4 og eksisterende FR-15.
 
@@ -41,4 +41,4 @@ Som bruker ønsker jeg en mykere kalender med fjell og vann som valgfri bakgrunn
 - [Landskapet uten grensesnitt](ux-designs/story-3-5/landscape-mountains-lake.png)
 - [Bildets opprinnelse](ux-designs/story-3-5/README.md)
 
-Story og bilder er planleggingsmateriale. Kalenderens kode er ikke endret i denne leveransen.
+Implementasjonen er kontrollert med 26 enhetstester og fire nettlesersuiter. Se [implementasjon og testresultater](../implementation-artifacts/spec-3-5-soft-nature-appearance.md). Endelig visuell godkjenning gjenstår; ingen publisering er gjort i denne økten.
