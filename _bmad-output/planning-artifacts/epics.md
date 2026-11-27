@@ -250,6 +250,14 @@ These refreshes never create operating-system/background notifications. Display 
 - Given reset preview, when Cancel is chosen, then restore saved appearance; when Save succeeds and the app reloads, then retain defaults.
 - Given saved tasks/categories and their open drafts, when appearance is reset and saved, then preserve them intact.
 
+### Story 3.5: Mykere kalender med naturbakgrunn
+
+**Status — 27 November 2026:** Approved backlog, not implemented. Stories 3.1–3.4 retain their existing acceptance; Epic 3 now has this additional pending story.
+
+As a calendar user, I want a softer appearance with an optional mountain landscape while retaining my own images and colours, so that the calendar feels personal and remains easy to read.
+
+See [Story 3.5 details and acceptance criteria](story-3-5-soft-nature-appearance.md), including the selected mockup and standalone landscape.
+
 ## Epics 4–5: Remaining planning reconciliation
 
 The approved stories remain in the overview. Reconcile delivered holiday decisions with their implementation records before final acceptance; do not rebuild them from historical open questions. Calendar-wide acceptance and external trials still belong to Epic 5.
