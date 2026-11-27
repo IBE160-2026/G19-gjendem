@@ -24,7 +24,7 @@
 /* Appearance colours affect surfaces, never category cards or form readability. */
 :root{background-color:var(--page-bg,#f5f6f8);background-image:var(--page-image,none);background-size:cover;background-position:center;background-attachment:fixed;min-height:100%}
 .calendar-card{background:var(--calendar-bg,#ffffff);color:var(--calendar-text,#000000)}
-.calendar-card>.toolbar .eyebrow,.calendar-card>.hint,.calendar-card>.category-tools #filter-status,.calendar-card>.tidy-toolbar p{color:var(--calendar-text,#000000)}
+.calendar-card .toolbar .eyebrow,.calendar-card>.hint,.calendar-card .category-tools #filter-status,.calendar-card .tidy-toolbar p{color:var(--calendar-text,#000000)}
 .day,.day.empty,.day.is-today{background:var(--days-bg,#ffffff);color:var(--days-text,#000000)}
 .day.empty{background:var(--empty-bg,#fafbfc)}.day.is-today{background:var(--today-bg,#f8fbff)}
 .day-number{color:var(--days-text,#000000)}
@@ -88,3 +88,65 @@ button{border-radius:12px}
 .nature-preset h4{font-size:17px;margin:0}
 .light-photo-calendar .calendar-card{background:rgba(255,255,255,.94);backdrop-filter:blur(16px)}
 .nature-preset .day-help{margin:8px 0 12px}
+
+/* Closed desktop month fits the available viewport; open work may scroll. */
+.month-more{display:none}
+@media(min-width:1100px){
+ .shell{position:relative;padding:14px 24px 10px}
+ .app-header,.custom-surround .app-header{min-height:48px;padding:8px 18px;margin-bottom:12px}
+ .app-header h1{font-size:24px;margin:0}
+ .app-header .eyebrow,.app-header p:not(.eyebrow){display:none}
+ .shell:has(#past-notice:not([hidden])) .local-badge{visibility:hidden}
+ .past-notice:not([hidden]){position:absolute;right:42px;top:20px;max-width:65%;display:flex;align-items:center;gap:10px;padding:3px 8px;margin:0;border-left-width:3px;border-radius:12px}
+ .past-notice p{font-size:12px;margin:0}.past-notice button{font-size:12px;padding:5px 10px}
+ .workspace{gap:16px;grid-template-columns:210px minmax(0,1fr)}
+ .calendar-heading{display:grid;grid-template-columns:minmax(170px,1fr) minmax(0,auto) auto;align-items:center;gap:12px;padding:10px 16px}
+ .calendar-heading .toolbar{display:contents}
+ .calendar-heading .toolbar>div{grid-column:1;grid-row:1}
+ .calendar-heading nav{grid-column:3;grid-row:1}
+ .calendar-heading h2{font-size:22px;margin:0}
+ .calendar-heading .eyebrow{display:none}
+ .calendar-heading .legend{grid-column:2;grid-row:1;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:3px;max-width:100%}
+ .calendar-heading .legend span{flex-shrink:0;padding:4px 8px}
+ .calendar-heading nav button{padding:6px 10px}
+ .calendar-scroll{margin:0 10px}
+ .weekdays{padding:5px 0;font-size:11px}
+ .month-grid>.week{min-height:max(80px,calc(var(--month-height,480px)/var(--week-count,6)))}
+ .day,.day.empty,.day.is-today{min-height:0;padding:2px 5px;border-radius:10px}
+ .day-heading{margin:0;min-height:20px;height:20px;gap:2px}
+ .day-number{font-size:12px;padding:1px 4px;min-width:22px}
+ .day .add{font-size:17px;width:20px;height:20px;line-height:16px}
+ .day .task{padding:0 3px;margin-top:2px;gap:4px;min-width:0;font-size:12px;line-height:16px}
+ .day .task-title{font-weight:500;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .day .task small{display:none}
+ .day .task input[type=checkbox]{height:13px;width:13px;margin:1px 0}
+ .day .month-overflow{display:none}
+ .month-more{display:block;font-size:11px;line-height:14px;padding:0 4px;border:0;margin-top:1px;background:#fff;color:#245790}
+ .day.holiday{padding-bottom:2px}
+ .day.holiday .day-heading{padding-right:22px}
+ .holiday-flag{top:2px;bottom:auto;right:4px;transform:scale(.8);transform-origin:top right}
+ .day .holiday-name{display:block;font-size:10px;line-height:12px;padding:0 3px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+ .calendar-card>.hint{display:none}
+ .calendar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px 14px}
+ .calendar-actions .category-tools,.calendar-actions .tidy-toolbar{display:contents}
+ .calendar-actions button,.calendar-actions select{font-size:12px;padding:6px 9px}
+ .calendar-actions label{font-size:12px;gap:6px}
+ .calendar-actions #filter-status,.calendar-actions .tidy-toolbar p{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ #upcoming{padding:14px;border-radius:22px}
+ #upcoming h2{margin-bottom:16px}
+ .period+.period{margin-top:14px;padding-top:14px}
+ footer,.custom-surround footer{margin-top:8px;padding:4px 12px;font-size:10px;line-height:14px;border-radius:12px}
+ footer br{display:none}
+}
+.month-time{display:none}
+@media(min-width:1100px){
+ .day .task-edit{display:flex;align-items:center;gap:3px}
+ .day .task-title{flex:1;min-width:0}
+ .day .month-time{display:inline;font-size:10px;white-space:nowrap;color:#47525e}
+ .day .conflict .task-title::before{content:'! ';font-weight:800}
+}
+@media(min-width:1100px){
+ .holiday-flag{top:auto;bottom:2px;right:3px;transform:scale(.65);transform-origin:bottom right}
+ .day.holiday .day-heading{padding-right:0}
+ .day.holiday .task,.day.holiday .month-more{margin-right:16px}
+}

@@ -154,3 +154,7 @@ The first increment places a counted notice above the calendar workspace when sa
 ## Story 3.5 appearance choice — 27 November 2026
 
 Offer the local mountain photo with separate surrounding/grid actions in the existing appearance editor. Both use preview and explicit Save, Cancel and Reset, with the same independent cancellation, validation, failure feedback and stale-write protection as personal uploads. Loading blocks Save; cancellation/removal/reset invalidate late responses. Existing task and category drafts are preserved. No default image replacement or mobile interaction change.
+
+## Desktop compact overview — 27 November 2026
+
+Story 3.5 now includes a closed month and main controls fitting the initial PC viewport at tested ordinary desktop sizes. The notice stays visible in a compact top position and opens the same review dialog. Two previews per day are shown on desktop; Vis mer opens all selected-day tasks using existing unsaved-change protection. Expanded day/forms may extend the page. Resizing only changes presentation and does not reload or discard drafts. This does not implement Epic 7 mobile behavior.

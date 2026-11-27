@@ -79,6 +79,7 @@ function render() {
   calendar.append(week);
   const grid=element('div',undefined,'month-grid');calendar.append(grid);
   const days = monthDays(year, month);
+  grid.style.setProperty('--week-count',String(days.length/7));
   const today = dateKey(new Date());
   for (let i = 0; i < days.length; i += 7) {
     const row = element('div', undefined, 'week');
@@ -111,10 +112,24 @@ function render() {
         const names=holidayNames.join(' · ');
         cell.setAttribute('aria-label',`${fullDate(date)} – ${names}`);
         label.setAttribute('aria-label',`Vis dagen ${fullDate(date)} – ${names}`);
-        cell.append(element('p',names,'holiday-name'));
+        const holidayLabel=element('p',names,'holiday-name');holidayLabel.title=names;cell.append(holidayLabel);
         const flag=element('span',undefined,'holiday-flag');flag.setAttribute('aria-hidden','true');cell.append(flag);
       }
-      for (const task of visibleTasks().filter(t => t.date === date && !t.archived).sort(byTime)) cell.append(taskCard(task, 'month'));
+      const dayTasks=visibleTasks().filter(t => t.date === date && !t.archived).sort(byTime);
+      for (const [index,task] of dayTasks.entries()) {
+        const card=taskCard(task,'month');
+        if(index>=2)card.classList.add('month-overflow');
+        cell.append(card);
+      }
+      if(dayTasks.length>2){
+        const more=element('button',`Vis mer (${dayTasks.length-2})`,'month-more');
+        more.setAttribute('aria-label',`Vis alle ${dayTasks.length} oppgaver ${fullDate(date)}`);
+        more.addEventListener('click',()=>{
+          if(expandedDate!==date)label.click();
+          else document.querySelector('#day-heading')?.focus();
+        });
+        cell.append(more);
+      }
       row.append(cell);
     }
     grid.append(row);
@@ -124,7 +139,18 @@ function render() {
   drawCompleted();
   drawUndated();
   refreshPastOverview();
+  requestAnimationFrame(fitDesktopMonth);
 }
+function fitDesktopMonth(){
+  if(!matchMedia('(min-width:1100px)').matches)return;
+  const scroll=document.querySelector('.calendar-scroll');
+  const controls=document.querySelector('.calendar-actions');
+  const footer=document.querySelector('footer');
+  const remaining=innerHeight-scroll.getBoundingClientRect().top-window.scrollY
+    -controls.getBoundingClientRect().height-footer.getBoundingClientRect().height-48;
+  calendar.style.setProperty('--month-height',`${Math.max(0,Math.floor(remaining))}px`);
+}
+window.addEventListener('resize',()=>requestAnimationFrame(fitDesktopMonth));
 const pastDialog = document.querySelector('#past-dialog');
 const pastEditorOpen = () => Boolean(document.querySelector('#past-editor #editor'));
 let pastSignature = '';
@@ -351,6 +377,11 @@ function taskCard(task, surface) {
   const edit = element('button', undefined, 'task-edit'); edit.type = 'button'; edit.disabled = blocked;
   edit.setAttribute('aria-label', `Rediger ${task.title}`);
   edit.append(element('span', task.title, 'task-title'), element('small', `${task.start ? `${task.start}–${task.end} · ` : ''}${categoryName(task.category)}`));
+  if(surface==='month'){
+    const detail=`${task.title}${task.start ? ` · ${task.start}–${task.end}` : ''} · ${categoryName(task.category)}${conflicts.has(task.id)?' · Overlapper':''}`;
+    edit.title=detail;edit.setAttribute('aria-label',`Rediger ${detail}`);
+    if(task.start)edit.append(element('span',task.start,'month-time'));
+  }
   if (surface.startsWith('sidebar-')) {
     edit.title = task.title;
     if (surface !== 'sidebar-today') edit.append(element('small', fullDate(task.date), 'task-date'));

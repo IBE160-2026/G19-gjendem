@@ -42,3 +42,11 @@ Som bruker ønsker jeg en mykere kalender med fjell og vann som valgfri bakgrunn
 - [Bildets opprinnelse](ux-designs/story-3-5/README.md)
 
 Implementasjonen er kontrollert med 26 enhetstester og fire nettlesersuiter. Se [implementasjon og testresultater](../implementation-artifacts/spec-3-5-soft-nature-appearance.md). Endelig visuell godkjenning gjenstår; ingen publisering er gjort i denne økten.
+
+## Approved PC-fit adjustment — 27 November 2026
+
+The user approved fitting the closed month and main controls into the first PC viewport, following the mockup. Compact the header and past-unfinished notice, align month/categories/navigation when space allows, size weeks from available viewport height, and show compact task previews with a day-opening "Vis mer" action. Group controls below the month. Preserve the left overview and all existing actions. Expanded days, forms, long lists, unusually small windows and enlarged text may scroll to preserve readability. This is a desktop adjustment within Story 3.5, not Epic 7 mobile implementation.
+
+Acceptance: at 1366×768 and 1920×1080 CSS viewports, with normal categories, a six-week month, past notice and multiple tasks, the last calendar row and primary controls are visible without page scrolling. Additional tasks remain accessible through the day view. Resizing must not lose drafts, change stored data or trap focus. Overflowing categories and zoom must remain reachable rather than clipped. Fresh verification and user visual acceptance are required.
+
+Refinement implementation completed locally on 27 November 2026. See [desktop-fit verification](../implementation-artifacts/spec-3-5-desktop-fit.md). User visual acceptance is still pending.

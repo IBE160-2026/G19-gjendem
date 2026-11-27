@@ -127,3 +127,5 @@ The agreed scope excludes task sharing, team administration, account synchronisa
 ## FR-15 extension — Story 3.5, 27 November 2026
 
 Approved implementation scope: softer rounded visual surfaces and a bundled optional mountain photo for either existing independent background. Preserve uploaded images, colours, explicit preview/save/cancel/reset and all task/category data. Stories 3.1–3.4 retain their earlier acceptance; Story 3.5 requires fresh verification and user visual acceptance. See ../../story-3-5-soft-nature-appearance.md.
+
+Story 3.5 desktop refinement (27 November 2026): fit the closed month and main controls into tested 1366x768 and 1920x1080 PC viewports through compact headings/notice, available-height week rows and two task previews plus Vis mer. Expanded work and small/zoomed windows may scroll. Preserve the left overview, all task actions and existing mobile behavior. See the Story 3.5 refinement and its desktop-fit evidence.

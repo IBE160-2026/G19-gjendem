@@ -147,3 +147,7 @@ Task cards use `{rounded.sm}`; buttons and inputs use `{rounded.md}`; calendar b
 ## Story 3.5 visual extension — 27 November 2026
 
 Use the approved mountain mockup as visual direction: rounded panels, controls and task cards, quieter grid separators, and lightly frosted surrounding surfaces. Preserve the desktop arrangement and category/status cues. The bundled mountain photo is optional for either background; existing images/colours are retained and reset defaults do not change. Opaque content surfaces protect text contrast. User visual acceptance follows implementation.
+
+## Desktop first-screen refinement — 27 November 2026
+
+The user approved a compact PC header and pending-task notice, a shared month/category/navigation row, viewport-aware week heights and a grouped action bar. At widths from 1100 CSS px the month shows two compact task previews and an accessible overflow button that opens the existing day view. Full task labels, time ranges and categories remain in tooltips/accessibility names and the full day/editor. Holiday flags retain bottom-right placement. Additional categories are keyboard-scrollable. Smaller viewports retain natural layout; expanded days, editors, user-expanded lists and zoom may scroll. The previous instruction to preserve PC placement means preserving the left overview and interaction model, not retaining oversized spacing. Target verification: 1366x768 and 1920x1080 CSS px.
