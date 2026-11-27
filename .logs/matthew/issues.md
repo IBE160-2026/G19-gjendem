@@ -15,4 +15,4 @@
 - [ ] 2026-11-02 [Mobil-epic](997-2026-11-02-19-37-28-mobil-epic.md) — Epic 7 er ikke startet: avklar skjermgrenser, nettbrett, testenheter og samordne PRD/UX ved oppstart. Epic 1 er nå avsluttet lokalt.
 
 - [x] 2026-11-27 [Utseende og Story 3.5](994-2026-11-23-21-05-46-utseende-sluttkontroll.md) — Implementere Story 3.5 med UX-samordning, optimalisert landskapsbilde og dokumentert funksjons-/lesbarhetskontroll (løst lokalt 2026-11-27).
-- [ ] 2026-11-27 [Visuell godkjenning av Story 3.5](994-2026-11-23-21-05-46-utseende-sluttkontroll.md) — Brukeren prøver fjellbakgrunnen og det mykere utseendet før endelig visuell akseptanse.
+- [ ] 2026-11-27 [Visuell godkjenning av Story 3.5](994-2026-11-23-21-05-46-utseende-sluttkontroll.md) — Brukeren prøver fjellbakgrunnen, det mykere utseendet og den kompakte PC-visningen med hele måneden før endelig visuell akseptanse.

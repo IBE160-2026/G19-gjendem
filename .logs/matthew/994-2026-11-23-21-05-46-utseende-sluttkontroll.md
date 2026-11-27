@@ -35,3 +35,13 @@ Story 3.5 «Mykere kalender med naturbakgrunn» er godkjent backlog, ikke implem
 **Resultat:** Mykere paneler, dagsruter, oppgavekort og knapper; roligere linjer og lyse frostede flater over bilder. Fjellbildet kan velges separat rundt kalenderen og i dagsrutene. Eksisterende egne bilder/farger beholdes. Komprimert lokal JPEG, ingen ekstern bildetjeneste. UX, PRD og story-status samordnet. 26 enhetstester og fire nettlesersuiter bestod. Skjermbilder inspisert. Uavhengig gjennomgang fant to testhull (riktig mål og bevaring ved bildefeil), begge rettet. En faktisk MIME-feil på lokal JPEG-levering ble fanget og rettet. Isolerte nettlesertester krevde utvidet lokal tilgang og omstart av server. Ingen personlige data endret. Commit 877ce88f0993bcbe2200a6cfc9906ecd7a753e06, ikke pushet. Lokal kalender kjører på http://localhost:5173/.
 
 **Åpent:** Brukeren skal prøve og visuelt godkjenne Story 3.5. Tidligere manuell zoom- og samlet brukertest i Epic 5 står fortsatt åpne.
+
+### Fortsettelse kl. 09:51 — kalender på første PC-skjerm
+
+**Oppgave:** Brukeren ønsket hele måneden og knappene på første skjerm, mer lik skissen, og ba om å justere Story 3.5.
+
+**Plan:** Komprimere overskrift/varsel, samle kalenderoverskrift og knapper, beregne tilgjengelig uke-høyde og vise to korte oppgaver med Vis mer. Bevare full dag, redigering, data og mindre skjermers naturlige scrolling.
+
+**Resultat:** Story 3.5, PRD og UX oppdatert. Implementert og lagret i a1a114edeafbdbf823491339e914513fda626dd1. 26 enhetstester og fem nettlesersuiter bestod. Hele måneden og hovedknappene passer ved testede 1366x768 og 1920x1080, inkludert seks uker, varsel og flere oppgaver. Vis mer åpner eksisterende dagsvisning. Skjermbilde inspisert. Uavhengig gjennomgang avdekket lange helligdagsnavn som gikk over cellekanten og brutt kontrast etter nye omsluttende elementer; begge rettet og regresjonstestet. Ingen push eller publisering.
+
+**Åpent:** Brukerens visuelle godkjenning omfatter nå også den kompakte PC-visningen. Åpne skjemaer, timeplaner og små/forstørrede vinduer kan fortsatt kreve scrolling. Tidligere Epic 5-kontroller gjelder fortsatt.
