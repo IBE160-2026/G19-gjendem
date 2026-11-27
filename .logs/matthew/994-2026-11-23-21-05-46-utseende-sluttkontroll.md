@@ -27,3 +27,11 @@ Story 3.5 «Mykere kalender med naturbakgrunn» er godkjent backlog, ikke implem
 
 ### Åpne punkter
 - Implementere Story 3.5 med UX-samordning, optimalisert bilde og dokumentert funksjons-/lesbarhetskontroll før akseptanse.
+
+### Fortsettelse kl. 09:34 — implementering godkjent av brukeren
+
+**Oppgave og plan:** Bygge Story 3.5 etter godkjent skisse, bevare eksisterende tilpasning og kontrollere bildevalg, lagring og lesbarhet.
+
+**Resultat:** Mykere paneler, dagsruter, oppgavekort og knapper; roligere linjer og lyse frostede flater over bilder. Fjellbildet kan velges separat rundt kalenderen og i dagsrutene. Eksisterende egne bilder/farger beholdes. Komprimert lokal JPEG, ingen ekstern bildetjeneste. UX, PRD og story-status samordnet. 26 enhetstester og fire nettlesersuiter bestod. Skjermbilder inspisert. Uavhengig gjennomgang fant to testhull (riktig mål og bevaring ved bildefeil), begge rettet. En faktisk MIME-feil på lokal JPEG-levering ble fanget og rettet. Isolerte nettlesertester krevde utvidet lokal tilgang og omstart av server. Ingen personlige data endret. Commit 877ce88f0993bcbe2200a6cfc9906ecd7a753e06, ikke pushet. Lokal kalender kjører på http://localhost:5173/.
+
+**Åpent:** Brukeren skal prøve og visuelt godkjenne Story 3.5. Tidligere manuell zoom- og samlet brukertest i Epic 5 står fortsatt åpne.
