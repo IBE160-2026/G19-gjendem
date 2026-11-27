@@ -13,3 +13,17 @@ Epic 3 er lokalt akseptert innenfor dokumentert testomfang. Commit 81e6a87b3212f
 
 ### Åpne punkter
 - Manuell kontroll med nettleserens zoom-meny inngår i Epic 5, sammen med de tidligere registrerte bruker-/produksjonskontrollene.
+
+## 2026-11-27 kl. 09:23 — Matthew
+
+### Oppgave
+Legge til Story 3.5 under Epic 3 basert på valgt fjellskisse og lage en separat versjon av landskapet.
+
+### Plan
+Registrere godkjent designretning og kriterier, bevare eksisterende tilpasning, generere landskapet med skissen som referanse og oppdatere statusoversikter.
+
+### Resultat
+Story 3.5 «Mykere kalender med naturbakgrunn» er godkjent backlog, ikke implementert. Epics, oversikt og README skiller ny story fra tidligere aksepterte 3.1–3.4. Skisse, landskapsoriginal og bildets opprinnelse er lagret under `_bmad-output/planning-artifacts/ux-designs/story-3-5/`. Landskapet er visuelt kontrollert uten grensesnitt eller tekst. Git diff --check bestått; ingen appkode endret, derfor ingen nye kjøringer av apptester. Lagret i lokal commit 1e344b6. Ikke pushet.
+
+### Åpne punkter
+- Implementere Story 3.5 med UX-samordning, optimalisert bilde og dokumentert funksjons-/lesbarhetskontroll før akseptanse.
